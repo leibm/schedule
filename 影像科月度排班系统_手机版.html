@@ -904,7 +904,7 @@
             },
             getShiftStyle(shift, index) {
                 const pool = [['#e6f7ff', '#096dd9'], ['#fff7e6', '#d46b08'], ['#f6ffed', '#389e0d'], ['#f9f0ff', '#531dab'], ['#fff0f6', '#c41d7f'], ['#e6fffb', '#08979c'], ['#fff2e8', '#ad2102'], ['#f0f5ff', '#1d39c4'], ['#fcffe6', '#5b8c00'], ['#fffbe6', '#ad6800']];
-                const defaults = { '白': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白2': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白3': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '夜': { 'bg': '#1a3a5c', 'color': '#fff' }, '备1': { 'bg': '#fff7e6', 'color': '#d46b08' }, '备2': { 'bg': '#ffe7ba', 'color': '#ad6800' }, '留': { 'bg': '#f6ffed', 'color': '#389e0d' }, '留备1': { 'bg': '#d9f7be', 'color': '#237804' }, '留备2': { 'bg': '#b7eb8f', 'color': '#135200' }, '休': { 'bg': '#fff1f0', 'color': '#cf1322' }, '': { 'bg': '#fff', 'color': '#999' } };
+                const defaults = { '白': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白2': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白3': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '夜': { 'bg': '#d9d9d9', 'color': '#333' }, '备1': { 'bg': '#fff7e6', 'color': '#d46b08' }, '备2': { 'bg': '#ffe7ba', 'color': '#ad6800' }, '留': { 'bg': '#f6ffed', 'color': '#389e0d' }, '留备1': { 'bg': '#d9f7be', 'color': '#237804' }, '留备2': { 'bg': '#b7eb8f', 'color': '#135200' }, '休': { 'bg': '#fff1f0', 'color': '#cf1322' }, '': { 'bg': '#fff', 'color': '#999' } };
                 if (shift === '') return { bg: '#fff', color: '#999' };
                 if (defaults[shift]) return defaults[shift];
                 const pair = pool[(Math.abs(shift.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % pool.length)];
