@@ -1414,6 +1414,7 @@
             },
             onRangeChange() {
                 if (this.currentView === 'table') this.renderTable();
+                this.updateStats();
             },
             prevWeek() {
                 if (this.currentWeekIndex > 0) {
@@ -1538,7 +1539,12 @@
             closeModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('editModal').classList.remove('active'); this.editingCell = null; },
             updateStats() {
                 const title = document.getElementById('statsTitle');
-                if (title) title.textContent = this.currentView === 'week' ? '📈 本周统计' : '📈 本月统计';
+                const hasRange = document.getElementById('rangeStart')?.value && document.getElementById('rangeEnd')?.value;
+                if (title) {
+                    if (this.currentView === 'week') title.textContent = '📈 本周统计';
+                    else if (this.currentView === 'table' && hasRange) title.textContent = '📈 范围统计';
+                    else title.textContent = '📈 本月统计';
+                }
                 const sel = document.getElementById('statsPerson');
                 const selected = sel ? sel.value : '-1';
                 const stats = {};
@@ -1564,6 +1570,24 @@
                             }
                         });
                     }
+                } else if (this.currentView === 'table') {
+                    const dates = this.getTableDates();
+                    dates.forEach(date => {
+                        const y = date.getFullYear();
+                        const m = date.getMonth() + 1;
+                        const d = date.getDate();
+                        const key = `${y}-${String(m).padStart(2, '0')}`;
+                        if (selected === '-1') {
+                            this.defaultStaff.forEach((_, row) => {
+                                const shift = this.scheduleData[key]?.[row]?.[d] || '';
+                                stats[shift || '空'] = (stats[shift || '空'] || 0) + 1;
+                            });
+                        } else {
+                            const row = parseInt(selected, 10);
+                            const shift = this.scheduleData[key]?.[row]?.[d] || '';
+                            stats[shift || '空'] = (stats[shift || '空'] || 0) + 1;
+                        }
+                    });
                 } else {
                     const key = this.getMonthKey();
                     const data = this.scheduleData[key] || {};
