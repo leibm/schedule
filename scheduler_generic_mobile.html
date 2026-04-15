@@ -723,51 +723,30 @@
             <div class="template-input">
                 <div class="template-row">
                     <label>人员</label>
-                    <select id="templatePerson">
+                    <select id="genericTemplatePerson">
                         <option value="">选择人员</option>
                     </select>
                 </div>
                 <div class="template-row">
                     <label>起始</label>
-                    <input type="number" id="templateStart" min="1" max="31" value="1" style="width: 70px;">
+                    <input type="number" id="genericTemplateStart" min="1" max="31" value="1" style="width: 60px;">
                     <label>模板</label>
-                    <input type="text" id="templatePattern" value="白,夜,休,休" style="flex: 2;">
+                    <select id="genericTemplateSelect" style="flex: 1;">
+                        <option value="">选择模板</option>
+                    </select>
                 </div>
                 <div class="template-row">
-                    <button class="btn-primary" onclick="app.applyTemplate()" style="width: 100%;">应用模板</button>
+                    <button class="btn-primary" onclick="app.applyGenericTemplate()" style="width: 100%;">应用模板</button>
                 </div>
-            </div>
-            <div style="margin-top: 16px; border-top: 1px solid #e8e8e8; padding-top: 12px;">
-                <h4 style="margin-bottom: 12px; font-size: 14px;">🧩 我的通用模板</h4>
-                <div class="template-input">
-                    <div class="template-row">
-                        <label>人员</label>
-                        <select id="genericTemplatePerson">
-                            <option value="">选择人员</option>
-                        </select>
-                    </div>
-                    <div class="template-row">
-                        <label>起始</label>
-                        <input type="number" id="genericTemplateStart" min="1" max="31" value="1" style="width: 60px;">
-                        <label>模板</label>
-                        <select id="genericTemplateSelect" style="flex: 1;">
-                            <option value="">选择模板</option>
-                        </select>
-                    </div>
-                    <div class="template-row">
-                        <button class="btn-primary" onclick="app.applyGenericTemplate()"
-                            style="width: 100%;">应用通用模板</button>
-                    </div>
-                    <div class="template-row" style="margin-top: 8px; flex-direction: column; align-items: stretch;">
-                        <label>管理模板</label>
-                        <div id="genericTemplateList" style="font-size: 12px; color: #666; line-height: 1.6;"></div>
-                        <div style="display: flex; gap: 6px; margin-top: 6px;">
-                            <input type="text" id="newGenericTemplateName" placeholder="模板名称"
-                                style="flex: 1; min-width: 0;">
-                            <input type="text" id="newGenericTemplatePattern" placeholder="班次序列，如：白,夜,休,休"
-                                style="flex: 2; min-width: 0;">
-                            <button class="btn-success" onclick="app.addGenericTemplate()">+</button>
-                        </div>
+                <div class="template-row" style="margin-top: 8px; flex-direction: column; align-items: stretch;">
+                    <label>管理模板</label>
+                    <div id="genericTemplateList" style="font-size: 12px; color: #666; line-height: 1.6;"></div>
+                    <div style="display: flex; gap: 6px; margin-top: 6px;">
+                        <input type="text" id="newGenericTemplateName" placeholder="模板名称"
+                            style="flex: 1; min-width: 0;">
+                        <input type="text" id="newGenericTemplatePattern" placeholder="班次序列，如：白,夜,休,休"
+                            style="flex: 2; min-width: 0;">
+                        <button class="btn-success" onclick="app.addGenericTemplate()">+</button>
                     </div>
                 </div>
             </div>
@@ -891,7 +870,6 @@
                 const saved = localStorage.getItem('scheduleData_generic_v2');
                 if (saved) { try { this.scheduleData = JSON.parse(saved); } catch (e) { } }
                 this.renderStatsSelect();
-                this.renderTemplatePersonSelect();
                 this.loadGenericTemplates();
                 this.renderShiftLegend();
                 this.loadMonthData();
@@ -934,10 +912,8 @@
                 this.displayNames = {}; shifts.forEach(s => this.displayNames[s.code] = s.name);
                 this.staffOrder = null;
                 localStorage.removeItem('staffOrder_generic_v2');
-                document.getElementById('templatePattern').value = this.shiftTypes.slice(0, 4).concat(this.shiftTypes[this.shiftTypes.length - 1] || '').join(',');
-                this.renderShiftLegend();
+                                this.renderShiftLegend();
                 this.renderStatsSelect();
-                this.renderTemplatePersonSelect();
                 this.loadGenericTemplates();
                 this.loadMonthData();
                 alert('设置已保存');
@@ -990,7 +966,6 @@
                 [list[index], list[newIndex]] = [list[newIndex], list[index]];
                 this.staffOrder = list;
                 localStorage.setItem('staffOrder_generic_v2', JSON.stringify(list));
-                this.renderTemplatePersonSelect();
                 this.renderStatsSelect();
                 this.loadMonthData();
             },
@@ -999,7 +974,6 @@
                 [list[fromIndex], list[toIndex]] = [list[toIndex], list[fromIndex]];
                 this.staffOrder = list;
                 localStorage.setItem('staffOrder_generic_v2', JSON.stringify(list));
-                this.renderTemplatePersonSelect();
                 this.renderStatsSelect();
                 this.loadMonthData();
             },
@@ -1066,48 +1040,6 @@
                 sel.innerHTML = '<option value="-1">全员</option>';
                 const staffList = this.getStaffList();
                 this.defaultStaff.forEach((name, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = staffList[i];
-                    sel.appendChild(opt);
-                });
-                sel.value = current;
-            },
-            renderTemplatePersonSelect() {
-                const sel = document.getElementById('templatePerson');
-                if (!sel) return;
-                const current = sel.value;
-                sel.innerHTML = '<option value="">选择人员</option>';
-                const staffList = this.getStaffList();
-                this.defaultStaff.forEach((_, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = staffList[i];
-                    sel.appendChild(opt);
-                });
-                sel.value = current;
-            },
-            renderTemplatePersonSelect() {
-                const sel = document.getElementById('templatePerson');
-                if (!sel) return;
-                const current = sel.value;
-                sel.innerHTML = '<option value="">选择人员</option>';
-                const staffList = this.getStaffList();
-                this.defaultStaff.forEach((_, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = staffList[i];
-                    sel.appendChild(opt);
-                });
-                sel.value = current;
-            },
-            renderTemplatePersonSelect() {
-                const sel = document.getElementById('templatePerson');
-                if (!sel) return;
-                const current = sel.value;
-                sel.innerHTML = '<option value="">选择人员</option>';
-                const staffList = this.getStaffList();
-                this.defaultStaff.forEach((_, i) => {
                     const opt = document.createElement('option');
                     opt.value = i;
                     opt.textContent = staffList[i];
@@ -1530,7 +1462,6 @@
                 localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData));
                 alert('通用模板已应用！');
             },
-            applyTemplate() { const rowIndex = parseInt(document.getElementById('templatePerson').value, 10); const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (isNaN(rowIndex)) { alert('请选择人员'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } for (let day = 1; day <= this.daysInMonth; day++) { const offset = day - startDay; const patternIndex = ((offset % pattern.length) + pattern.length) % pattern.length; const shift = pattern[patternIndex]; if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('模板已应用！'); },
             clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); },
             autoSchedule() { alert('通用版不支持自动排班，请使用下方「通用模板」功能。'); },
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
