@@ -827,7 +827,7 @@
                 if (staffRaw) {
                     try { this.defaultStaff = JSON.parse(staffRaw); } catch (e) { }
                 }
-                if (!this.defaultStaff || !this.defaultStaff.length) this.defaultStaff = ['向锺宁', '陈钰波', '刘成伟', '刘浅予', '雷宝铭', '丁小涵', '徐畅'];
+                if (!this.defaultStaff || !this.defaultStaff.length) this.defaultStaff = ['雷宝铭', '丁小涵', '徐畅', '陈钰波', '刘成伟', '刘浅予', '向锺宁'];
                 const shiftsRaw = localStorage.getItem('customShifts_v1');
                 if (shiftsRaw) {
                     try { this.shiftTypes = JSON.parse(shiftsRaw).map(s => s.code); this.displayNames = {}; JSON.parse(shiftsRaw).forEach(s => this.displayNames[s.code] = s.name); } catch (e) { }
