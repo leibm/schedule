@@ -885,10 +885,10 @@
             init() {
                 this.loadSettings();
                 document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
-                const savedOrder = localStorage.getItem('staffOrder_v2');
+                const savedOrder = localStorage.getItem('staffOrder_generic_v2');
                 if (savedOrder) { try { this.staffOrder = JSON.parse(savedOrder); } catch (e) { } }
                 if (window.innerWidth < 768) this.setView('card');
-                const saved = localStorage.getItem('scheduleData_v2');
+                const saved = localStorage.getItem('scheduleData_generic_v2');
                 if (saved) { try { this.scheduleData = JSON.parse(saved); } catch (e) { } }
                 this.renderStatsSelect();
                 this.renderTemplatePersonSelect();
@@ -897,12 +897,12 @@
                 this.loadMonthData();
             },
             loadSettings() {
-                const staffRaw = localStorage.getItem('customStaff_v1');
+                const staffRaw = localStorage.getItem('customStaff_generic_v1');
                 if (staffRaw) {
                     try { this.defaultStaff = JSON.parse(staffRaw); } catch (e) { }
                 }
                 if (!this.defaultStaff || !this.defaultStaff.length) this.defaultStaff = ['张三', '李四', '王五'];
-                const shiftsRaw = localStorage.getItem('customShifts_v1');
+                const shiftsRaw = localStorage.getItem('customShifts_generic_v1');
                 if (shiftsRaw) {
                     try { this.shiftTypes = JSON.parse(shiftsRaw).map(s => s.code); this.displayNames = {}; JSON.parse(shiftsRaw).forEach(s => this.displayNames[s.code] = s.name); } catch (e) { }
                 }
@@ -927,13 +927,13 @@
                 });
                 if (shifts.length === 0) { alert('至少需要一个班次'); return; }
                 if (!shifts.some(s => s.code === '')) shifts.push({ code: '', name: '清空' });
-                localStorage.setItem('customStaff_v1', JSON.stringify(staffList));
-                localStorage.setItem('customShifts_v1', JSON.stringify(shifts));
+                localStorage.setItem('customStaff_generic_v1', JSON.stringify(staffList));
+                localStorage.setItem('customShifts_generic_v1', JSON.stringify(shifts));
                 this.defaultStaff = staffList;
                 this.shiftTypes = shifts.map(s => s.code);
                 this.displayNames = {}; shifts.forEach(s => this.displayNames[s.code] = s.name);
                 this.staffOrder = null;
-                localStorage.removeItem('staffOrder_v2');
+                localStorage.removeItem('staffOrder_generic_v2');
                 document.getElementById('templatePattern').value = this.shiftTypes.slice(0, 4).concat(this.shiftTypes[this.shiftTypes.length - 1] || '').join(',');
                 this.renderShiftLegend();
                 this.renderStatsSelect();
@@ -989,7 +989,7 @@
                 if (newIndex < 0 || newIndex >= list.length) return;
                 [list[index], list[newIndex]] = [list[newIndex], list[index]];
                 this.staffOrder = list;
-                localStorage.setItem('staffOrder_v2', JSON.stringify(list));
+                localStorage.setItem('staffOrder_generic_v2', JSON.stringify(list));
                 this.renderTemplatePersonSelect();
                 this.renderStatsSelect();
                 this.loadMonthData();
@@ -998,7 +998,7 @@
                 const list = this.getStaffList();
                 [list[fromIndex], list[toIndex]] = [list[toIndex], list[fromIndex]];
                 this.staffOrder = list;
-                localStorage.setItem('staffOrder_v2', JSON.stringify(list));
+                localStorage.setItem('staffOrder_generic_v2', JSON.stringify(list));
                 this.renderTemplatePersonSelect();
                 this.renderStatsSelect();
                 this.loadMonthData();
@@ -1411,7 +1411,7 @@
                 }
                 this.updateSummary(row);
                 if (!skipSave) {
-                    this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData));
+                    this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData));
                     if (this.currentView === 'table') {
                         const dates = this.getTableDates();
                         const isCrossMonth = dates.some(d => d.getFullYear() !== this.currentYear || d.getMonth() + 1 !== this.currentMonth);
@@ -1525,13 +1525,13 @@
                     }
                 }
                 this.updateStats();
-                localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData));
+                localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData));
                 alert('通用模板已应用！');
             },
-            applyTemplate() { const rowIndex = parseInt(document.getElementById('templatePerson').value, 10); const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (isNaN(rowIndex)) { alert('请选择人员'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } for (let day = startDay; day <= this.daysInMonth; day++) { const shift = pattern[(day - startDay) % pattern.length]; if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); alert('模板已应用！'); },
-            clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); },
+            applyTemplate() { const rowIndex = parseInt(document.getElementById('templatePerson').value, 10); const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (isNaN(rowIndex)) { alert('请选择人员'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } for (let day = startDay; day <= this.daysInMonth; day++) { const shift = pattern[(day - startDay) % pattern.length]; if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('模板已应用！'); },
+            clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); },
             autoSchedule() { alert('通用版不支持自动排班，请使用下方「通用模板」功能。'); },
-            saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
+            saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
             exportExcel() { let csv = '姓名,'; for (let d = 1; d <= this.daysInMonth; d++) csv += d + '日,'; csv = csv.slice(0, -1) + '\n'; const key = this.getMonthKey(); this.defaultStaff.forEach((name, rowIndex) => { csv += name; for (let col = 1; col <= this.daysInMonth; col++) { const shift = this.scheduleData[key]?.[rowIndex]?.[col] || ''; csv += ',' + shift; } csv += '\n'; }); const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班表_${this.getMonthKey()}.csv`; a.click(); URL.revokeObjectURL(url); }
         };
         window.addEventListener('load', () => app.init());
