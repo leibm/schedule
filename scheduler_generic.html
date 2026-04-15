@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>通用排班系统</title>
-        <style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -138,7 +138,7 @@
             background: #ffffff;
             color: #4b5563;
             border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
         }
 
         .btn-success {
@@ -190,7 +190,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
         }
 
         .table-wrapper {
@@ -442,7 +442,7 @@
             border-radius: 10px;
             text-align: center;
             border: 1px solid #f3f4f6;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         }
 
         .stat-label {
@@ -939,7 +939,15 @@
             currentWeekIndex: 0,
             init() {
                 this.loadSettings();
-                document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+                const lastMonth = localStorage.getItem('lastSelectedMonth_generic_v1');
+                if (lastMonth) {
+                    document.getElementById('monthPicker').value = lastMonth;
+                    const [y, m] = lastMonth.split('-').map(Number);
+                    this.currentYear = y;
+                    this.currentMonth = m;
+                } else {
+                    document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+                }
                 const savedOrder = localStorage.getItem('staffOrder_generic_v2');
                 if (savedOrder) { try { this.staffOrder = JSON.parse(savedOrder); } catch (e) { } }
                 if (window.innerWidth < 768) this.setView('card');
@@ -1120,7 +1128,7 @@
                 if (view === 'week') this.renderWeekView();
                 this.updateStats();
             },
-            onMonthChange(value) { const [y, m] = value.split('-').map(Number); this.currentYear = y; this.currentMonth = m; this.loadMonthData(); },
+            onMonthChange(value) { localStorage.setItem('lastSelectedMonth_generic_v1', value); const [y, m] = value.split('-').map(Number); this.currentYear = y; this.currentMonth = m; this.loadMonthData(); },
             getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); },
             getWeekday(year, month, day) { return new Date(year, month - 1, day).getDay(); },
             getMonthKey() { return `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; },
