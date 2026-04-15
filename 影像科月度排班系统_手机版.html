@@ -928,6 +928,7 @@
                 this.staffOrder = list;
                 localStorage.setItem('staffOrder_v2', JSON.stringify(list));
                 this.renderTemplatePersonSelect();
+                this.renderStatsSelect();
                 this.loadMonthData();
             },
             dragStaff(fromIndex, toIndex) {
@@ -936,6 +937,7 @@
                 this.staffOrder = list;
                 localStorage.setItem('staffOrder_v2', JSON.stringify(list));
                 this.renderTemplatePersonSelect();
+                this.renderStatsSelect();
                 this.loadMonthData();
             },
             bindDragEvents(el, rowIndex) {
