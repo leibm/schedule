@@ -1231,15 +1231,25 @@
                     const end = week[6];
                     label.textContent = `${start.getMonth() + 1}月${start.getDate()}日 ~ ${end.getMonth() + 1}月${end.getDate()}日`;
                 }
-                const key = this.getMonthKey();
-                if (this.scheduleData[key]) {
-                    Object.entries(this.scheduleData[key]).forEach(([row, cols]) => {
-                        Object.entries(cols).forEach(([col, shift]) => {
-                            const cell = document.getElementById(`w-${row}-${col}`);
-                            if (cell) { cell.textContent = shift; const wIdx = this.shiftTypes.indexOf(shift); const wStyle = this.getShiftStyle(shift, wIdx); cell.style.background = wStyle.bg; cell.style.color = wStyle.color; cell.style.cssText += this.getUnderlineStyle(shift, !!cell.dataset.wdWeekend); if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg'); }
-                        });
+                this.defaultStaff.forEach((_, dataRow) => {
+                    week.forEach((date) => {
+                        const day = date.getDate();
+                        const y = date.getFullYear();
+                        const m = date.getMonth() + 1;
+                        const key = `${y}-${String(m).padStart(2, '0')}`;
+                        const shift = this.scheduleData[key]?.[dataRow]?.[day] || '';
+                        const cell = document.getElementById(`w-${dataRow}-${day}`);
+                        if (cell) {
+                            cell.textContent = shift;
+                            const wIdx = this.shiftTypes.indexOf(shift);
+                            const wStyle = this.getShiftStyle(shift, wIdx);
+                            cell.style.background = wStyle.bg;
+                            cell.style.color = wStyle.color;
+                            cell.style.cssText += this.getUnderlineStyle(shift, !!cell.dataset.wdWeekend);
+                            if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg');
+                        }
                     });
-                }
+                });
             },
             onRangeChange() {
                 if (this.currentView === 'table') this.renderTable();
