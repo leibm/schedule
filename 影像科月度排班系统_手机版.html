@@ -646,7 +646,7 @@
             <button class="active" onclick="app.setView('table')">📊 表格</button>
             <button onclick="app.setView('card')">🃏 卡片</button>
             <button onclick="app.setView('week')">📅 周视图</button>
-                    </div>
+        </div>
         <div class="toolbar">
             <div class="toolbar-group">
                 <label>月份</label>
@@ -1012,14 +1012,14 @@
                         const td = document.createElement('td');
                         td.className = 'shift-cell';
                         if (wd === 0 || wd === 6) td.classList.add('weekend-bg');
+                        const key = `${y}-${String(m).padStart(2, '0')}`;
+                        const shift = this.scheduleData[key]?.[dataRow]?.[d] || '';
+                        td.textContent = shift;
+                        td.classList.add('shift-' + (shift || 'empty'));
                         if (isCurrentMonthOnly) {
                             td.id = `t-${dataRow}-${d}`;
                             td.addEventListener('click', () => this.setShift(dataRow, d, this.currentShift));
                         } else {
-                            const key = `${y}-${String(m).padStart(2, '0')}`;
-                            const shift = this.scheduleData[key]?.[dataRow]?.[d] || '';
-                            td.textContent = shift;
-                            td.classList.add('shift-' + (shift || 'empty'));
                             td.addEventListener('click', () => {
                                 const origYear = this.currentYear, origMonth = this.currentMonth, origDays = this.daysInMonth;
                                 this.currentYear = y; this.currentMonth = m; this.daysInMonth = this.getDaysInMonth(y, m);
