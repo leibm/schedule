@@ -1129,7 +1129,7 @@
                 this.renderCards();
                 if (this.currentView === 'week') this.renderWeekView();
                 const key = this.getMonthKey();
-                if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]);
+                if (this.scheduleData[key] && this.currentView !== 'week') this.applyScheduleData(this.scheduleData[key]);
                 this.updateStats();
             },
             getTableDates() {
@@ -1323,7 +1323,7 @@
                 this.currentWeekIndex = weeks.length - 1;
                 this.renderWeekView();
                 const key = this.getMonthKey();
-                if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]);
+                if (this.scheduleData[key] && this.currentView !== 'week') this.applyScheduleData(this.scheduleData[key]);
                 this.updateStats();
             },
             nextWeek() {
@@ -1342,7 +1342,7 @@
                 this.currentWeekIndex = 0;
                 this.renderWeekView();
                 const key = this.getMonthKey();
-                if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]);
+                if (this.scheduleData[key] && this.currentView !== 'week') this.applyScheduleData(this.scheduleData[key]);
                 this.updateStats();
             },
             currentWeek() {
