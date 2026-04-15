@@ -864,13 +864,13 @@
                 thead.innerHTML = headHTML;
                 tbody.innerHTML = '';
                 const staffList = this.getStaffList();
-                staffList.forEach((name, displayRow) => {
-                    const dataRow = this.defaultStaff.indexOf(name);
+                this.defaultStaff.forEach((_, dataRow) => {
+                    const name = staffList[dataRow];
                     const tr = document.createElement('tr');
                     const nameTd = document.createElement('td');
                     nameTd.className = 'name-cell';
                     nameTd.textContent = name;
-                    this.bindDragEvents(nameTd, displayRow);
+                    this.bindDragEvents(nameTd, dataRow);
                     tr.appendChild(nameTd);
                     for (let col = 1; col <= this.daysInMonth; col++) {
                         const td = document.createElement('td');
@@ -886,8 +886,8 @@
                 const cardView = document.getElementById('cardView');
                 cardView.innerHTML = '';
                 const staffList = this.getStaffList();
-                staffList.forEach((name) => {
-                    const dataRow = this.defaultStaff.indexOf(name);
+                this.defaultStaff.forEach((_, dataRow) => {
+                    const name = staffList[dataRow];
                     const card = document.createElement('div');
                     card.className = 'staff-card';
                     card.innerHTML = `<div class="staff-card-header"><span class="staff-name">${name}</span><span class="staff-summary" id="summary-${dataRow}">未排班</span></div><div class="days-grid" id="days-grid-${dataRow}"></div>`;
@@ -924,13 +924,13 @@
                 thead.innerHTML = headHTML;
                 tbody.innerHTML = '';
                 const staffList = this.getStaffList();
-                staffList.forEach((name, displayRow) => {
-                    const dataRow = this.defaultStaff.indexOf(name);
+                this.defaultStaff.forEach((_, dataRow) => {
+                    const name = staffList[dataRow];
                     const tr = document.createElement('tr');
                     const nameTd = document.createElement('td');
                     nameTd.className = 'name-cell';
                     nameTd.textContent = name;
-                    this.bindDragEvents(nameTd, displayRow);
+                    this.bindDragEvents(nameTd, dataRow);
                     tr.appendChild(nameTd);
                     week.forEach((date) => {
                         const day = date.getDate();
