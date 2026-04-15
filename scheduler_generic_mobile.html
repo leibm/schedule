@@ -1518,8 +1518,10 @@
                 const template = this.genericTemplates[parseInt(templateIndex, 10)];
                 const pattern = template.pattern.split(/[,，]/).map(s => s.trim()).filter(s => s);
                 if (pattern.length === 0) { alert('模板格式错误'); return; }
-                for (let day = startDay; day <= this.daysInMonth; day++) {
-                    const shift = pattern[(day - startDay) % pattern.length];
+                for (let day = 1; day <= this.daysInMonth; day++) {
+                    const offset = day - startDay;
+                    const patternIndex = ((offset % pattern.length) + pattern.length) % pattern.length;
+                    const shift = pattern[patternIndex];
                     if (this.shiftTypes.includes(shift)) {
                         this.setShift(rowIndex, day, shift, true);
                     }
@@ -1528,7 +1530,7 @@
                 localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData));
                 alert('通用模板已应用！');
             },
-            applyTemplate() { const rowIndex = parseInt(document.getElementById('templatePerson').value, 10); const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (isNaN(rowIndex)) { alert('请选择人员'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } for (let day = startDay; day <= this.daysInMonth; day++) { const shift = pattern[(day - startDay) % pattern.length]; if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('模板已应用！'); },
+            applyTemplate() { const rowIndex = parseInt(document.getElementById('templatePerson').value, 10); const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (isNaN(rowIndex)) { alert('请选择人员'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } for (let day = 1; day <= this.daysInMonth; day++) { const offset = day - startDay; const patternIndex = ((offset % pattern.length) + pattern.length) % pattern.length; const shift = pattern[patternIndex]; if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('模板已应用！'); },
             clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); },
             autoSchedule() { alert('通用版不支持自动排班，请使用下方「通用模板」功能。'); },
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
