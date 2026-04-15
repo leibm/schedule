@@ -927,8 +927,8 @@
                     try { this.shiftTypes = JSON.parse(shiftsRaw).map(s => s.code); this.displayNames = {}; JSON.parse(shiftsRaw).forEach(s => this.displayNames[s.code] = s.name); } catch (e) { }
                 }
                 if (!this.shiftTypes || !this.shiftTypes.length) {
-                    this.shiftTypes = ['白', '白2', '白3', '夜', '备1', '备2', '留', '留备1', '留备2', '休', ''];
-                    this.displayNames = { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '备1': '备1', '备2': '备2', '留': '留班', '留备1': '留备1', '留备2': '留备2', '休': '休息', '': '清空' };
+                    this.shiftTypes = ['白', '白2', '白3', '夜', '留', '休', ''];
+                    this.displayNames = { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '留': '留班', '休': '休息', '': '清空' };
                 }
                 this.currentShift = this.shiftTypes[0] || '';
             },
@@ -984,7 +984,7 @@
             },
             getShiftStyle(shift, index) {
                 const pool = [['#e6f7ff', '#096dd9'], ['#fff7e6', '#d46b08'], ['#f6ffed', '#389e0d'], ['#f9f0ff', '#531dab'], ['#fff0f6', '#c41d7f'], ['#e6fffb', '#08979c'], ['#fff2e8', '#ad2102'], ['#f0f5ff', '#1d39c4'], ['#fcffe6', '#5b8c00'], ['#fffbe6', '#ad6800']];
-                const defaults = { '白': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白2': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白3': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '夜': { 'bg': '#d9d9d9', 'color': '#333' }, '备1': { 'bg': '#fff7e6', 'color': '#d46b08' }, '备2': { 'bg': '#ffe7ba', 'color': '#ad6800' }, '留': { 'bg': '#f6ffed', 'color': '#389e0d' }, '留备1': { 'bg': '#d9f7be', 'color': '#237804' }, '留备2': { 'bg': '#b7eb8f', 'color': '#135200' }, '休': { 'bg': '#fff1f0', 'color': '#cf1322' }, '': { 'bg': '#fff', 'color': '#999' } };
+                const defaults = { '白': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白2': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白3': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '夜': { 'bg': '#d9d9d9', 'color': '#333' }, '留': { 'bg': '#f6ffed', 'color': '#389e0d' }, '休': { 'bg': '#fff1f0', 'color': '#cf1322' }, '': { 'bg': '#fff', 'color': '#999' } };
                 if (shift === '') return { bg: '#fff', color: '#999' };
                 if (defaults[shift]) return defaults[shift];
                 const pair = pool[(Math.abs(shift.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % pool.length)];
@@ -1411,13 +1411,36 @@
                 const selected = sel ? sel.value : '-1';
                 const stats = {};
                 this.shiftTypes.forEach(t => stats[t || '空'] = 0);
-                const key = this.getMonthKey();
-                const data = this.scheduleData[key] || {};
-                if (selected === '-1') {
-                    Object.values(data).forEach(rowData => { Object.values(rowData).forEach(shift => { stats[shift || '空'] = (stats[shift || '空'] || 0) + 1; }); });
+                if (this.currentView === 'week') {
+                    const weeks = this.getWeeksInMonth();
+                    if (this.currentWeekIndex >= 0 && this.currentWeekIndex < weeks.length) {
+                        const week = weeks[this.currentWeekIndex];
+                        week.forEach(date => {
+                            const y = date.getFullYear();
+                            const m = date.getMonth() + 1;
+                            const d = date.getDate();
+                            const key = `${y}-${String(m).padStart(2, '0')}`;
+                            if (selected === '-1') {
+                                this.defaultStaff.forEach((_, row) => {
+                                    const shift = this.scheduleData[key]?.[row]?.[d] || '';
+                                    stats[shift || '空'] = (stats[shift || '空'] || 0) + 1;
+                                });
+                            } else {
+                                const row = parseInt(selected, 10);
+                                const shift = this.scheduleData[key]?.[row]?.[d] || '';
+                                stats[shift || '空'] = (stats[shift || '空'] || 0) + 1;
+                            }
+                        });
+                    }
                 } else {
-                    const rowData = data[parseInt(selected, 10)] || {};
-                    Object.values(rowData).forEach(shift => { stats[shift || '空'] = (stats[shift || '空'] || 0) + 1; });
+                    const key = this.getMonthKey();
+                    const data = this.scheduleData[key] || {};
+                    if (selected === '-1') {
+                        Object.values(data).forEach(rowData => { Object.values(rowData).forEach(shift => { stats[shift || '空'] = (stats[shift || '空'] || 0) + 1; }); });
+                    } else {
+                        const rowData = data[parseInt(selected, 10)] || {};
+                        Object.values(rowData).forEach(shift => { stats[shift || '空'] = (stats[shift || '空'] || 0) + 1; });
+                    }
                 }
                 const grid = document.getElementById('statsGrid');
                 grid.innerHTML = '';
@@ -1525,9 +1548,14 @@
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
                     try {
-                        new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
+                        if (typeof QRCode !== 'undefined') {
+                            new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
+                        } else {
+                            throw new Error('QRCode lib not loaded');
+                        }
                     } catch (qrErr) {
-                        container.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;">链接较长，请直接复制下方链接分享</div>';
+                        const encodedUrl = encodeURIComponent(this._shareUrl);
+                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
                     }
                     document.getElementById('shareModal').classList.add('active');
                 } catch (err) {
