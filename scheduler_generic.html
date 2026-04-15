@@ -692,7 +692,7 @@
             }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="qrcode.min.js"></script>
 </head>
 
 <body>
@@ -805,7 +805,7 @@
         <div class="card-view" id="cardView"></div>
         <div class="stats-panel">
             <div class="stats-header-bar">
-                <h3 style="font-size: 14px;">📈 本月统计</h3>
+                <h3 id="statsTitle" style="font-size: 14px;">📈 本月统计</h3>
                 <div class="toolbar-group">
                     <label>人员</label>
                     <select id="statsPerson" onchange="app.updateStats()">
@@ -1048,6 +1048,7 @@
                 document.getElementById('cardView').classList.toggle('active', view === 'card');
                 document.getElementById('weekView').classList.toggle('active', view === 'week');
                 if (view === 'week') this.renderWeekView();
+                this.updateStats();
             },
             onMonthChange(value) { const [y, m] = value.split('-').map(Number); this.currentYear = y; this.currentMonth = m; this.loadMonthData(); },
             getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); },
@@ -1407,6 +1408,8 @@
             openModal(row, col, name) { this.editingCell = { row, col }; document.getElementById('modalTitle').textContent = `${name} · ${this.currentMonth}月${col}日`; const container = document.getElementById('modalShifts'); container.innerHTML = ''; this.shiftTypes.forEach((shift, i) => { const div = document.createElement('div'); div.className = 'modal-shift'; div.textContent = this.displayNames[shift] || '清空'; const sStyle = this.getShiftStyle(shift, i); div.style.background = sStyle.bg; div.style.color = sStyle.color; div.addEventListener('click', () => { this.setShift(row, col, shift); this.closeModal(); }); container.appendChild(div); }); document.getElementById('editModal').classList.add('active'); },
             closeModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('editModal').classList.remove('active'); this.editingCell = null; },
             updateStats() {
+                const title = document.getElementById('statsTitle');
+                if (title) title.textContent = this.currentView === 'week' ? '📈 本周统计' : '📈 本月统计';
                 const sel = document.getElementById('statsPerson');
                 const selected = sel ? sel.value : '-1';
                 const stats = {};
@@ -1548,11 +1551,7 @@
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
                     try {
-                        if (typeof QRCode !== 'undefined') {
-                            new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
-                        } else {
-                            throw new Error('QRCode lib not loaded');
-                        }
+                        new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
                     } catch (qrErr) {
                         const encodedUrl = encodeURIComponent(this._shareUrl);
                         container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
