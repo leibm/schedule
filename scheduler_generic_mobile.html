@@ -714,6 +714,9 @@
                 <button class="btn-secondary" onclick="window.print()">🖨️</button>
             </div>
             <div class="toolbar-group">
+                <button class="btn-primary" onclick="app.loadSchedule()">📥 加载</button>
+            </div>
+            <div class="toolbar-group">
                 <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
             </div>
         </div>
@@ -1475,6 +1478,36 @@
             clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); },
             autoSchedule() { alert('通用版不支持自动排班，请使用下方「通用模板」功能。'); },
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
+            loadSchedule() {
+                let input = document.getElementById('scheduleFileInput');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'file';
+                    input.id = 'scheduleFileInput';
+                    input.accept = '.json,application/json';
+                    input.style.display = 'none';
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            try {
+                                const data = JSON.parse(ev.target.result);
+                                if (!data || !data.schedules) { alert('文件格式错误'); return; }
+                                if (confirm('加载排班会覆盖当前所有月份的数据，是否继续？')) {
+                                    this.scheduleData = { ...this.scheduleData, ...data.schedules };
+                                    localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData));
+                                    this.loadMonthData();
+                                    alert('排班已加载！');
+                                }
+                            } catch (err) { alert('文件解析失败：' + err.message); }
+                        };
+                        reader.readAsText(file);
+                    };
+                    document.body.appendChild(input);
+                }
+                input.click();
+            },
             exportExcel() { let csv = '姓名,'; for (let d = 1; d <= this.daysInMonth; d++) csv += d + '日,'; csv = csv.slice(0, -1) + '\n'; const key = this.getMonthKey(); this.defaultStaff.forEach((name, rowIndex) => { csv += name; for (let col = 1; col <= this.daysInMonth; col++) { const shift = this.scheduleData[key]?.[rowIndex]?.[col] || ''; csv += ',' + shift; } csv += '\n'; }); const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班表_${this.getMonthKey()}.csv`; a.click(); URL.revokeObjectURL(url); }
         };
         window.addEventListener('load', () => app.init());
