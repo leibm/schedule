@@ -897,9 +897,24 @@
                         const shared = JSON.parse(payload);
                         if (shared && Object.keys(shared).length) {
                             if (confirm('检测到分享链接中的排班数据，是否加载？')) {
-                                this.scheduleData = shared;
+                                if (shared.key && shared.data && shared.shifts) {
+                                    const shiftChars = {};
+                                    shared.shifts.forEach((t, i) => { shiftChars[String.fromCharCode(33 + i)] = t; });
+                                    const restored = {};
+                                    Object.entries(shared.data).forEach(([row, str]) => {
+                                        restored[row] = {};
+                                        for (let i = 0; i < str.length; i++) {
+                                            const ch = str[i];
+                                            if (ch !== ' ') restored[row][i + 1] = shiftChars[ch] || '';
+                                        }
+                                    });
+                                    this.scheduleData[shared.key] = restored;
+                                } else {
+                                    this.scheduleData = { ...this.scheduleData, ...shared };
+                                }
                                 localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData));
                                 window.location.hash = '';
+                                this.loadMonthData();
                                 alert('分享排班已加载！');
                             } else {
                                 window.location.hash = '';
@@ -1522,18 +1537,33 @@
                 try {
                     const monthKey = this.getMonthKey();
                     const monthData = this.scheduleData[monthKey] || {};
-                    const payload = JSON.stringify({ [monthKey]: monthData });
+                    const shiftChars = {};
+                    this.shiftTypes.forEach((t, i) => { shiftChars[t] = String.fromCharCode(33 + i); });
+                    const compact = {};
+                    this.defaultStaff.forEach((_, row) => {
+                        let str = '';
+                        for (let d = 1; d <= this.daysInMonth; d++) {
+                            const shift = monthData[row]?.[d] || '';
+                            str += shiftChars[shift] || ' ';
+                        }
+                        if (str.trim()) compact[row] = str;
+                    });
+                    const payload = JSON.stringify({ key: monthKey, data: compact, shifts: this.shiftTypes });
                     const encoded = btoa(encodeURIComponent(payload));
                     this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+                    document.getElementById('shareModal').classList.add('active');
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
-                    const encodedUrl = encodeURIComponent(this._shareUrl);
-                    if (this._shareUrl.length > 2000) {
-                        container.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;">排班数据较长，请直接点击下方「复制链接」进行分享</div>';
-                    } else {
-                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
+                    try {
+                        if (typeof QRCode !== 'undefined') {
+                            new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
+                        } else {
+                            throw new Error('QRCode not loaded');
+                        }
+                    } catch (qrErr) {
+                        const encodedUrl = encodeURIComponent(this._shareUrl);
+                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" alt="二维码" style="width:200px;height:200px;border-radius:8px;"><div style="display:none;color:#999;font-size:12px;padding:8px;">二维码加载失败，请直接点击下方「复制链接」进行分享</div>';
                     }
-                    document.getElementById('shareModal').classList.add('active');
                 } catch (err) {
                     alert('分享失败：' + err.message);
                 }

@@ -733,6 +733,12 @@
             </div>
         </div>
         <div class="shift-legend" id="shiftLegend"></div>
+        <div style="font-size:12px;color:#666;margin:-8px 0 12px 0;padding:0 4px;">
+            <span
+                style="text-decoration:underline;text-decoration-color:#ff7875;text-decoration-thickness:2px;text-underline-offset:2px;">红色线段</span>代表备1，
+            <span
+                style="text-decoration:underline;text-decoration-color:#fadb14;text-decoration-thickness:2px;text-underline-offset:2px;">黄色线段</span>代表备2
+        </div>
         <div class="template-section">
             <h4>📝 模板排班</h4>
             <div class="template-input">
@@ -901,7 +907,21 @@
                         const shared = JSON.parse(payload);
                         if (shared && Object.keys(shared).length) {
                             if (confirm('检测到分享链接中的排班数据，是否加载？')) {
-                                this.scheduleData = shared;
+                                if (shared.key && shared.data && shared.shifts) {
+                                    const shiftChars = {};
+                                    shared.shifts.forEach((t, i) => { shiftChars[String.fromCharCode(33 + i)] = t; });
+                                    const restored = {};
+                                    Object.entries(shared.data).forEach(([row, str]) => {
+                                        restored[row] = {};
+                                        for (let i = 0; i < str.length; i++) {
+                                            const ch = str[i];
+                                            if (ch !== ' ') restored[row][i + 1] = shiftChars[ch] || '';
+                                        }
+                                    });
+                                    this.scheduleData[shared.key] = restored;
+                                } else {
+                                    this.scheduleData = { ...this.scheduleData, ...shared };
+                                }
                                 localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData));
                                 window.location.hash = '';
                                 alert('分享排班已加载！');
@@ -999,7 +1019,12 @@
                 document.getElementById('settingShifts').value = shiftVal;
                 body.style.display = body.style.display === 'none' ? 'block' : 'none';
             },
-            getUnderlineStyle(shift, isWeekend) { return ''; },
+            getUnderlineStyle(shift, isWeekend) {
+                if (shift === '白3') return 'text-decoration: underline; text-decoration-color: #ff7875; text-decoration-thickness: 2px; text-underline-offset: 2px;';
+                if (shift === '留' && !isWeekend) return 'text-decoration: underline; text-decoration-color: #fadb14; text-decoration-thickness: 2px; text-underline-offset: 2px;';
+                if ((shift === '留' || shift === '夜') && isWeekend) return 'text-decoration: underline; text-decoration-color: #ff7875; text-decoration-thickness: 2px; text-underline-offset: 2px;';
+                return '';
+            },
             getStaffList() { return this.staffOrder || [...this.defaultStaff]; },
             moveStaff(index, direction) {
                 const list = this.getStaffList();
@@ -1360,6 +1385,7 @@
                     const csStyle = this.getShiftStyle(shift, csIdx);
                     cardShift.style.background = csStyle.bg;
                     cardShift.style.color = csStyle.color;
+                    cardShift.style.cssText += this.getUnderlineStyle(shift, isWeekend);
                     const wd = this.getWeekday(this.currentYear, this.currentMonth, col);
                     const holiday = this.isHoliday(this.currentYear, this.currentMonth, col);
                     cardWrap.className = `day-cell ${wd === 0 || wd === 6 ? 'weekend' : ''} ${holiday ? (holiday.off ? 'holiday' : 'festival') : ''}`;
@@ -1372,7 +1398,7 @@
                         const cw = document.getElementById(`c-wrap-${row}-${col + 1}`);
                         if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; tc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; wc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
-                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
+                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; cs.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 1);
                             const h2 = this.isHoliday(this.currentYear, this.currentMonth, col + 1);
@@ -1386,7 +1412,7 @@
                         const cw = document.getElementById(`c-wrap-${row}-${col + 2}`);
                         if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; tc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; wc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
-                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
+                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; cs.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 2);
                             const h2 = this.isHoliday(this.currentYear, this.currentMonth, col + 2);
@@ -1547,18 +1573,33 @@
                 try {
                     const monthKey = this.getMonthKey();
                     const monthData = this.scheduleData[monthKey] || {};
-                    const payload = JSON.stringify({ [monthKey]: monthData });
+                    const shiftChars = {};
+                    this.shiftTypes.forEach((t, i) => { shiftChars[t] = String.fromCharCode(33 + i); });
+                    const compact = {};
+                    this.defaultStaff.forEach((_, row) => {
+                        let str = '';
+                        for (let d = 1; d <= this.daysInMonth; d++) {
+                            const shift = monthData[row]?.[d] || '';
+                            str += shiftChars[shift] || ' ';
+                        }
+                        if (str.trim()) compact[row] = str;
+                    });
+                    const payload = JSON.stringify({ key: monthKey, data: compact, shifts: this.shiftTypes });
                     const encoded = btoa(encodeURIComponent(payload));
                     this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+                    document.getElementById('shareModal').classList.add('active');
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
-                    const encodedUrl = encodeURIComponent(this._shareUrl);
-                    if (this._shareUrl.length > 2000) {
-                        container.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;">排班数据较长，请直接点击下方「复制链接」进行分享</div>';
-                    } else {
-                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
+                    try {
+                        if (typeof QRCode !== 'undefined') {
+                            new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
+                        } else {
+                            throw new Error('QRCode not loaded');
+                        }
+                    } catch (qrErr) {
+                        const encodedUrl = encodeURIComponent(this._shareUrl);
+                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" alt="二维码" style="width:200px;height:200px;border-radius:8px;"><div style="display:none;color:#999;font-size:12px;padding:8px;">二维码加载失败，请直接点击下方「复制链接」进行分享</div>';
                     }
-                    document.getElementById('shareModal').classList.add('active');
                 } catch (err) {
                     alert('分享失败：' + err.message);
                 }
