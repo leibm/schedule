@@ -715,6 +715,7 @@
             </div>
             <div class="toolbar-group">
                 <button class="btn-primary" onclick="app.loadSchedule()">📥 加载</button>
+                <button class="btn-success" onclick="app.shareSchedule()">🔗 分享</button>
             </div>
             <div class="toolbar-group">
                 <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
@@ -862,6 +863,23 @@
                 if (window.innerWidth < 768) this.setView('card');
                 const saved = localStorage.getItem('scheduleData_v2');
                 if (saved) { try { this.scheduleData = JSON.parse(saved); } catch (e) { } }
+                if (window.location.hash.startsWith('#share=')) {
+                    try {
+                        const encoded = window.location.hash.slice(7);
+                        const payload = decodeURIComponent(atob(encoded));
+                        const shared = JSON.parse(payload);
+                        if (shared && Object.keys(shared).length) {
+                            if (confirm('检测到分享链接中的排班数据，是否加载？')) {
+                                this.scheduleData = shared;
+                                localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData));
+                                window.location.hash = '';
+                                alert('分享排班已加载！');
+                            } else {
+                                window.location.hash = '';
+                            }
+                        }
+                    } catch (e) { window.location.hash = ''; }
+                }
                 this.renderStatsSelect();
                 this.renderTemplatePersonSelect();
                 this.renderShiftLegend();
@@ -1446,6 +1464,16 @@
             clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); },
             autoSchedule() { if (!confirm('确定要按周轮转规则自动生成本月排班吗？这会覆盖现有排班。')) return; const staff = this.defaultStaff; const weekPattern = ['白2', '留', '白3', '夜', '休', '休']; const baseTemplates = []; for (let i = 0; i < 6; i++) { const t = []; for (let d = 0; d < 7; d++) t.push(weekPattern[(i + d) % weekPattern.length]); baseTemplates.push(t); } const longBaiTemplate = ['白', '白', '白', '白', '白', '休', '休']; this.clearAll(true); let queue = null; const savedQueueState = localStorage.getItem('autoScheduleQueueState'); if (savedQueueState) { try { const state = JSON.parse(savedQueueState); const prevMonth = this.currentMonth === 1 ? 12 : this.currentMonth - 1; const prevYear = this.currentMonth === 1 ? this.currentYear - 1 : this.currentYear; if (state.year === prevYear && state.month === prevMonth) { queue = state.queue; } } catch (e) { } } if (!queue) queue = staff.map((_, i) => i); for (let day = 1; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); const dayIndex = wd === 0 ? 6 : wd - 1; for (let r = 0; r < staff.length; r++) { const role = queue.indexOf(r); let shift = role === 6 ? longBaiTemplate[dayIndex] : baseTemplates[role][dayIndex]; if (wd === 0 || wd === 6) { if (shift === '白2') shift = '留'; else if (shift !== '夜') shift = '休'; } this.setShift(r, day, shift, true); } if (wd === 0) { const nextQueue = new Array(7); nextQueue[0] = queue[5]; nextQueue[1] = queue[0]; nextQueue[2] = queue[1]; nextQueue[3] = queue[6]; nextQueue[4] = queue[3]; nextQueue[5] = queue[4]; nextQueue[6] = queue[2]; for (let p = 0; p < 7; p++) queue[p] = nextQueue[p]; } } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); localStorage.setItem('autoScheduleQueueState', JSON.stringify({ year: this.currentYear, month: this.currentMonth, queue })); alert('自动排班已完成！'); },
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
+            shareSchedule() {
+                const payload = JSON.stringify(this.scheduleData);
+                const encoded = btoa(encodeURIComponent(payload));
+                const shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('分享链接已复制到剪贴板！');
+                }).catch(() => {
+                    prompt('请复制以下链接进行分享', shareUrl);
+                });
+            },
             loadSchedule() {
                 let input = document.getElementById('scheduleFileInput');
                 if (!input) {
