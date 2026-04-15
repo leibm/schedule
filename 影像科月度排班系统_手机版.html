@@ -919,6 +919,12 @@
                 document.getElementById('settingShifts').value = shiftVal;
                 body.style.display = body.style.display === 'none' ? 'block' : 'none';
             },
+            getCellBorder(shift, isWeekend) {
+                if (shift === '白3') return '2px solid #cf1322';
+                if (shift === '留' && !isWeekend) return '2px solid #fadb14';
+                if ((shift === '留' || shift === '夜') && isWeekend) return '2px solid #cf1322';
+                return '1px solid #e8e8e8';
+            },
             getStaffList() { return this.staffOrder || [...this.defaultStaff]; },
             moveStaff(index, direction) {
                 const list = this.getStaffList();
@@ -1133,6 +1139,7 @@
                         const sStyle = this.getShiftStyle(shift, sIdx);
                         td.style.background = sStyle.bg;
                         td.style.color = sStyle.color;
+                        td.style.border = this.getCellBorder(shift, wd === 0 || wd === 6);
                         if (isCurrentMonthOnly) {
                             td.id = `t-${dataRow}-${d}`;
                             td.addEventListener('click', () => this.setShift(dataRow, d, this.currentShift));
@@ -1209,6 +1216,7 @@
                         const td = document.createElement('td');
                         td.className = 'shift-cell';
                         if (realWd === 0 || realWd === 6) td.classList.add('weekend-bg');
+                        td.dataset.wdWeekend = (realWd === 0 || realWd === 6) ? '1' : '';
                         td.id = `w-${dataRow}-${day}`;
                         td.style.opacity = isCurrentMonth ? '' : '0.4';
                         if (isCurrentMonth) {
@@ -1229,7 +1237,7 @@
                     Object.entries(this.scheduleData[key]).forEach(([row, cols]) => {
                         Object.entries(cols).forEach(([col, shift]) => {
                             const cell = document.getElementById(`w-${row}-${col}`);
-                            if (cell) { cell.textContent = shift; const wIdx = this.shiftTypes.indexOf(shift); const wStyle = this.getShiftStyle(shift, wIdx); cell.style.background = wStyle.bg; cell.style.color = wStyle.color; if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg'); }
+                            if (cell) { cell.textContent = shift; const wIdx = this.shiftTypes.indexOf(shift); const wStyle = this.getShiftStyle(shift, wIdx); cell.style.background = wStyle.bg; cell.style.color = wStyle.color; cell.style.border = this.getCellBorder(shift, !!cell.dataset.wdWeekend); if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg'); }
                         });
                     });
                 }
@@ -1296,10 +1304,12 @@
                     if (col + 1 <= this.daysInMonth) this.scheduleData[key][row][col + 1] = '休';
                     if (col + 2 <= this.daysInMonth) this.scheduleData[key][row][col + 2] = '休';
                 }
+                const wd = this.getWeekday(this.currentYear, this.currentMonth, col);
+                const isWeekend = wd === 0 || wd === 6;
                 const tableCell = document.getElementById(`t-${row}-${col}`);
-                if (tableCell) { tableCell.textContent = shift; const sIdx = this.shiftTypes.indexOf(shift); const sStyle = this.getShiftStyle(shift, sIdx); tableCell.style.background = sStyle.bg; tableCell.style.color = sStyle.color; }
+                if (tableCell) { tableCell.textContent = shift; const sIdx = this.shiftTypes.indexOf(shift); const sStyle = this.getShiftStyle(shift, sIdx); tableCell.style.background = sStyle.bg; tableCell.style.color = sStyle.color; tableCell.style.border = this.getCellBorder(shift, isWeekend); }
                 const weekCell = document.getElementById(`w-${row}-${col}`);
-                if (weekCell) { weekCell.textContent = shift; const wsIdx = this.shiftTypes.indexOf(shift); const wsStyle = this.getShiftStyle(shift, wsIdx); weekCell.style.background = wsStyle.bg; weekCell.style.color = wsStyle.color; }
+                if (weekCell) { weekCell.textContent = shift; const wsIdx = this.shiftTypes.indexOf(shift); const wsStyle = this.getShiftStyle(shift, wsIdx); weekCell.style.background = wsStyle.bg; weekCell.style.color = wsStyle.color; weekCell.style.border = this.getCellBorder(shift, isWeekend); }
                 const cardShift = document.getElementById(`c-${row}-${col}`);
                 const cardWrap = document.getElementById(`c-wrap-${row}-${col}`);
                 if (cardShift && cardWrap) {
@@ -1318,8 +1328,8 @@
                         const wc = document.getElementById(`w-${row}-${col + 1}`);
                         const cs = document.getElementById(`c-${row}-${col + 1}`);
                         const cw = document.getElementById(`c-wrap-${row}-${col + 1}`);
-                        if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; }
-                        if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; }
+                        if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; tc.style.border = this.getCellBorder('休', isWeekend); }
+                        if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; wc.style.border = this.getCellBorder('休', isWeekend); }
                         if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 1);
@@ -1332,8 +1342,8 @@
                         const wc = document.getElementById(`w-${row}-${col + 2}`);
                         const cs = document.getElementById(`c-${row}-${col + 2}`);
                         const cw = document.getElementById(`c-wrap-${row}-${col + 2}`);
-                        if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; }
-                        if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; }
+                        if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; tc.style.border = this.getCellBorder('休', isWeekend); }
+                        if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; wc.style.border = this.getCellBorder('休', isWeekend); }
                         if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 2);
