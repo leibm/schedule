@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>影像科月度排班系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            padding: 12px;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 16px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: #f0f0f0;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .view-toggle button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            background: transparent;
+            color: #666;
+        }
+
+        .view-toggle button.active {
+            background: white;
+            color: #1890ff;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        input[type="month"],
+        select {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+        }
+
+        .btn-success {
+            background: #52c41a;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #faad14;
+            color: white;
+        }
+
+        .shift-legend {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .shift-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 8px 4px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            background: #fafafa;
+            border: 2px solid transparent;
+        }
+
+        .shift-item.active {
+            background: #e6f7ff;
+            border-color: #1890ff;
+        }
+
+        .shift-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .table-wrapper.active {
+            display: block;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 800px;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            border: 1px solid #e8e8e8;
+            padding: 6px 3px;
+            text-align: center;
+            min-width: 32px;
+        }
+
+        .schedule-table th {
+            background: #fafafa;
+            font-weight: 600;
+        }
+
+        .schedule-table th.name-header {
+            min-width: 70px;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+
+        .schedule-table td.name-cell {
+            background: #fafafa;
+            font-weight: 500;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+        }
+
+        .schedule-table td.shift-cell {
+            cursor: pointer;
+            transition: all 0.15s;
+            height: 32px;
+        }
+
+        .schedule-table td.shift-cell:active {
+            opacity: 0.6;
+            transform: scale(0.95);
+        }
+
+        .schedule-table th.weekend {
+            background: #fff1f0;
+            color: #cf1322;
+        }
+
+        .card-view {
+            display: none;
+        }
+
+        .card-view.active {
+            display: block;
+        }
+
+        .staff-card {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .staff-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .staff-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .staff-summary {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e8e8e8;
+        }
+
+        .day-cell {
+            background: white;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            min-height: 52px;
+            transition: all 0.15s;
+            padding: 4px;
+        }
+
+        .day-cell:active {
+            transform: scale(0.95);
+        }
+
+        .day-cell.weekend {
+            background: #fff9f9;
+        }
+
+        .day-number {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 2px;
+        }
+
+        .day-number.weekend-day {
+            color: #cf1322;
+            font-weight: 500;
+        }
+
+        .day-shift {
+            font-size: 15px;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        .stats-panel {
+            margin-top: 16px;
+            padding: 14px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 10px 6px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e8e8e8;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 2px;
+        }
+
+        .template-section {
+            margin: 16px 0;
+            padding: 14px;
+            background: #e6f7ff;
+            border-radius: 10px;
+        }
+
+        .template-section h4 {
+            margin-bottom: 12px;
+            color: #096dd9;
+            font-size: 14px;
+        }
+
+        .template-input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .template-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .template-input label {
+            font-size: 13px;
+            min-width: 50px;
+            color: #333;
+        }
+
+        .template-input input,
+        .template-input select {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .shift-白,
+        .shift-白2,
+        .shift-白3 {
+            background: #e6f7ff;
+            color: #096dd9;
+        }
+
+        .shift-夜 {
+            background: #111d2c;
+            color: #fff;
+        }
+
+        .shift-备1 {
+            background: #fff7e6;
+            color: #d46b08;
+        }
+
+        .shift-备2 {
+            background: #ffe7ba;
+            color: #ad6800;
+        }
+
+        .shift-留 {
+            background: #f6ffed;
+            color: #389e0d;
+        }
+
+        .shift-留备1 {
+            background: #d9f7be;
+            color: #237804;
+        }
+
+        .shift-留备2 {
+            background: #b7eb8f;
+            color: #135200;
+        }
+
+        .shift-休 {
+            background: #fff1f0;
+            color: #cf1322;
+        }
+
+        .shift- {
+            background: #fff;
+            color: #999;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .modal-shifts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .modal-shift {
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .modal-cancel {
+            width: 100%;
+            padding: 12px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #666;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+                padding-bottom: 20px;
+            }
+
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .shift-legend {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .shift-item {
+                flex-direction: row;
+                padding: 8px 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .template-input {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .toolbar,
+            .stats-panel,
+            .template-section,
+            .view-toggle {
+                display: none !important;
+            }
+
+            .table-wrapper {
+                display: block !important;
+            }
+
+            .card-view {
+                display: none !important;
+            }
+
+            .schedule-table {
+                font-size: 10px;
+            }
+
+            .schedule-table th,
+            .schedule-table td {
+                padding: 4px 2px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🏥 影像科月度排班表</h1>
+        <div class="view-toggle" id="viewToggle">
+            <button class="active" onclick="app.setView('table')">📊 表格</button>
+            <button onclick="app.setView('card')">🃏 卡片</button>
+        </div>
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <label>月份</label>
+                <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
+            </div>
+            <div class="toolbar-group">
+                <button class="btn-secondary" onclick="app.prevMonth()">←</button>
+                <button class="btn-secondary" onclick="app.nextMonth()">→</button>
+                <button class="btn-secondary" onclick="app.currentMonth()">本月</button>
+            </div>
+            <div class="toolbar-group">
+                <button class="btn-primary" onclick="app.saveSchedule()">💾 保存</button>
+                <button class="btn-success" onclick="app.exportExcel()">📊 Excel</button>
+                <button class="btn-secondary" onclick="window.print()">🖨️</button>
+            </div>
+            <div class="toolbar-group">
+                <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
+            </div>
+            <div class="toolbar-group">
+                <button class="btn-primary" onclick="app.autoSchedule()">🤖 自动排班</button>
+            </div>
+        </div>
+        <div class="shift-legend" id="shiftLegend">
+            <div class="shift-item active" data-shift="白" onclick="app.selectShift('白')">
+                <div class="shift-color shift-白">白</div><span>白班</span>
+            </div>
+            <div class="shift-item" data-shift="白2" onclick="app.selectShift('白2')">
+                <div class="shift-color shift-白2">白2</div><span>白班2</span>
+            </div>
+            <div class="shift-item" data-shift="白3" onclick="app.selectShift('白3')">
+                <div class="shift-color shift-白3">白3</div><span>白班3</span>
+            </div>
+            <div class="shift-item" data-shift="夜" onclick="app.selectShift('夜')">
+                <div class="shift-color shift-夜">夜</div><span>夜班</span>
+            </div>
+            <div class="shift-item" data-shift="备1" onclick="app.selectShift('备1')">
+                <div class="shift-color shift-备1">备1</div><span>备1</span>
+            </div>
+            <div class="shift-item" data-shift="备2" onclick="app.selectShift('备2')">
+                <div class="shift-color shift-备2">备2</div><span>备2</span>
+            </div>
+            <div class="shift-item" data-shift="留" onclick="app.selectShift('留')">
+                <div class="shift-color shift-留">留</div><span>留班</span>
+            </div>
+            <div class="shift-item" data-shift="留备1" onclick="app.selectShift('留备1')">
+                <div class="shift-color shift-留备1">留备1</div><span>留备1</span>
+            </div>
+            <div class="shift-item" data-shift="留备2" onclick="app.selectShift('留备2')">
+                <div class="shift-color shift-留备2">留备2</div><span>留备2</span>
+            </div>
+            <div class="shift-item" data-shift="休" onclick="app.selectShift('休')">
+                <div class="shift-color shift-休">休</div><span>休息</span>
+            </div>
+            <div class="shift-item" data-shift="" onclick="app.selectShift('')">
+                <div class="shift-color shift-">空</div><span>清空</span>
+            </div>
+        </div>
+        <div class="template-section">
+            <h4>📝 按模板快速排班</h4>
+            <div class="template-input">
+                <div class="template-row">
+                    <label>人员</label>
+                    <select id="templatePerson">
+                        <option value="">选择人员</option>
+                        <option value="向锺宁">向锺宁</option>
+                        <option value="陈钰波">陈钰波</option>
+                        <option value="刘成伟">刘成伟</option>
+                        <option value="刘浅予">刘浅予</option>
+                        <option value="雷宝铭">雷宝铭</option>
+                        <option value="丁小涵">丁小涵</option>
+                        <option value="徐畅">徐畅</option>
+                    </select>
+                </div>
+                <div class="template-row">
+                    <label>起始</label>
+                    <input type="number" id="templateStart" min="1" max="31" value="1" style="width: 70px;">
+                    <label>模板</label>
+                    <input type="text" id="templatePattern" value="白2,留,白3,夜,休,休" style="flex: 2;">
+                </div>
+                <div class="template-row">
+                    <button class="btn-primary" onclick="app.applyTemplate()" style="width: 100%;">应用模板</button>
+                </div>
+            </div>
+        </div>
+        <div class="table-wrapper active" id="tableView">
+            <table class="schedule-table" id="scheduleTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        <div class="card-view" id="cardView"></div>
+        <div class="stats-panel">
+            <h3 style="font-size: 14px;">📈 本月统计</h3>
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="editModal" onclick="app.closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-title" id="modalTitle">选择班次</div>
+            <div class="modal-shifts" id="modalShifts"></div>
+            <button class="modal-cancel" onclick="app.closeModal()">取消</button>
+        </div>
+    </div>
+    <script>
+        const app = {
+            defaultStaff: ['向锺宁', '陈钰波', '刘成伟', '刘浅予', '雷宝铭', '丁小涵', '徐畅'],
+            shiftTypes: ['白', '白2', '白3', '夜', '备1', '备2', '留', '留备1', '留备2', '休', ''],
+            displayNames: { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '备1': '备1', '备2': '备2', '留': '留班', '留备1': '留备1', '留备2': '留备2', '休': '休息', '': '清空' },
+            currentShift: '白', currentYear: new Date().getFullYear(), currentMonth: new Date().getMonth() + 1,
+            scheduleData: {}, daysInMonth: 31, currentView: 'table', editingCell: null,
+            init() {
+                document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+                if (window.innerWidth < 768) this.setView('card');
+                const saved = localStorage.getItem('scheduleData_v2');
+                if (saved) { try { this.scheduleData = JSON.parse(saved); } catch (e) { } }
+                this.loadMonthData();
+            },
+            selectShift(shift) { this.currentShift = shift; document.querySelectorAll('.shift-item').forEach(item => { item.classList.toggle('active', item.dataset.shift === shift); }); },
+            setView(view) { this.currentView = view; document.querySelectorAll('.view-toggle button').forEach((btn, i) => { btn.classList.toggle('active', (view === 'table' && i === 0) || (view === 'card' && i === 1)); }); document.getElementById('tableView').classList.toggle('active', view === 'table'); document.getElementById('cardView').classList.toggle('active', view === 'card'); },
+            onMonthChange(value) { const [y, m] = value.split('-').map(Number); this.currentYear = y; this.currentMonth = m; this.loadMonthData(); },
+            getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); },
+            getWeekday(year, month, day) { return new Date(year, month - 1, day).getDay(); },
+            getMonthKey() { return `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; },
+            loadMonthData() { this.daysInMonth = this.getDaysInMonth(this.currentYear, this.currentMonth); this.renderTable(); this.renderCards(); const key = this.getMonthKey(); if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]); this.updateStats(); },
+            renderTable() { const thead = document.getElementById('tableHead'), tbody = document.getElementById('tableBody'); const weekNames = ['日', '一', '二', '三', '四', '五', '六']; let headHTML = '<tr><th class="name-header">姓名</th>'; for (let d = 1; d <= this.daysInMonth; d++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, d); headHTML += `<th class="${wd === 0 || wd === 6 ? 'weekend' : ''}">${d}<br><small>${weekNames[wd]}</small></th>`; } headHTML += '</tr>'; thead.innerHTML = headHTML; tbody.innerHTML = ''; this.defaultStaff.forEach((name, rowIndex) => { const tr = document.createElement('tr'); const nameTd = document.createElement('td'); nameTd.className = 'name-cell'; nameTd.textContent = name; tr.appendChild(nameTd); for (let col = 1; col <= this.daysInMonth; col++) { const td = document.createElement('td'); td.className = 'shift-cell'; td.id = `t-${rowIndex}-${col}`; td.addEventListener('click', () => this.setShift(rowIndex, col, this.currentShift)); tr.appendChild(td); } tbody.appendChild(tr); }); },
+            renderCards() { const cardView = document.getElementById('cardView'); cardView.innerHTML = ''; this.defaultStaff.forEach((name, rowIndex) => { const card = document.createElement('div'); card.className = 'staff-card'; card.innerHTML = `<div class="staff-card-header"><span class="staff-name">${name}</span><span class="staff-summary" id="summary-${rowIndex}">未排班</span></div><div class="days-grid" id="days-grid-${rowIndex}"></div>`; cardView.appendChild(card); const grid = card.querySelector('.days-grid'); for (let day = 1; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); const isWeekend = wd === 0 || wd === 6; const cell = document.createElement('div'); cell.className = `day-cell ${isWeekend ? 'weekend' : ''}`; cell.id = `c-wrap-${rowIndex}-${day}`; cell.innerHTML = `<span class="day-number ${isWeekend ? 'weekend-day' : ''}">${day}</span><span class="day-shift" id="c-${rowIndex}-${day}"></span>`; cell.addEventListener('click', () => this.openModal(rowIndex, day, name)); grid.appendChild(cell); } }); },
+            setShift(row, col, shift, skipSave) { const key = this.getMonthKey(); if (!this.scheduleData[key]) this.scheduleData[key] = {}; if (!this.scheduleData[key][row]) this.scheduleData[key][row] = {}; this.scheduleData[key][row][col] = shift; if (shift === '夜') { if (col + 1 <= this.daysInMonth) this.scheduleData[key][row][col + 1] = '休'; if (col + 2 <= this.daysInMonth) this.scheduleData[key][row][col + 2] = '休'; } const tableCell = document.getElementById(`t-${row}-${col}`); if (tableCell) { tableCell.textContent = shift; tableCell.className = 'shift-cell shift-' + (shift || 'empty'); } const cardShift = document.getElementById(`c-${row}-${col}`); const cardWrap = document.getElementById(`c-wrap-${row}-${col}`); if (cardShift && cardWrap) { cardShift.textContent = shift; cardShift.className = 'day-shift shift-' + (shift || 'empty'); const wd = this.getWeekday(this.currentYear, this.currentMonth, col); cardWrap.className = `day-cell ${wd === 0 || wd === 6 ? 'weekend' : ''}`; if (shift) cardWrap.classList.add('shift-' + shift); } if (shift === '夜') { if (col + 1 <= this.daysInMonth) { const tc = document.getElementById(`t-${row}-${col + 1}`); const cs = document.getElementById(`c-${row}-${col + 1}`); const cw = document.getElementById(`c-wrap-${row}-${col + 1}`); if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; } if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; } if (cw) cw.className = 'day-cell shift-休'; } if (col + 2 <= this.daysInMonth) { const tc = document.getElementById(`t-${row}-${col + 2}`); const cs = document.getElementById(`c-${row}-${col + 2}`); const cw = document.getElementById(`c-wrap-${row}-${col + 2}`); if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; } if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; } if (cw) cw.className = 'day-cell shift-休'; } } this.updateSummary(row); if (!skipSave) { this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); } },
+            updateSummary(row) { const key = this.getMonthKey(); const data = this.scheduleData[key]?.[row] || {}; const counts = {}; Object.values(data).forEach(s => { if (s) counts[s] = (counts[s] || 0) + 1; }); const summary = Object.entries(counts).map(([s, c]) => `${s}${c}`).join(' '); document.getElementById(`summary-${row}`).textContent = summary || '未排班'; },
+            openModal(row, col, name) { this.editingCell = { row, col }; document.getElementById('modalTitle').textContent = `${name} · ${this.currentMonth}月${col}日`; const container = document.getElementById('modalShifts'); container.innerHTML = ''; this.shiftTypes.forEach(shift => { const div = document.createElement('div'); div.className = `modal-shift shift-${shift || 'empty'}`; div.textContent = this.displayNames[shift] || '清空'; div.addEventListener('click', () => { this.setShift(row, col, shift); this.closeModal(); }); container.appendChild(div); }); document.getElementById('editModal').classList.add('active'); },
+            closeModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('editModal').classList.remove('active'); this.editingCell = null; },
+            updateStats() { const stats = {}; this.shiftTypes.forEach(t => stats[t || '空'] = 0); const key = this.getMonthKey(); const data = this.scheduleData[key] || {}; Object.values(data).forEach(rowData => { Object.values(rowData).forEach(shift => { stats[shift || '空'] = (stats[shift || '空'] || 0) + 1; }); }); const grid = document.getElementById('statsGrid'); grid.innerHTML = ''; const names = { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '备1': '备1', '备2': '备2', '留': '留班', '留备1': '留备1', '留备2': '留备2', '休': '休息' }; Object.entries(stats).forEach(([shift, count]) => { if (count > 0 && shift !== '空') { const card = document.createElement('div'); card.className = 'stat-card'; card.innerHTML = `<div class="stat-label">${names[shift] || shift}</div><div class="stat-value">${count}</div>`; grid.appendChild(card); } }); },
+            applyScheduleData(data) { Object.entries(data).forEach(([row, cols]) => { Object.entries(cols).forEach(([col, shift]) => { this.setShift(parseInt(row), parseInt(col), shift, true); }); }); this.updateStats(); },
+            prevMonth() { this.currentMonth--; if (this.currentMonth < 1) { this.currentMonth = 12; this.currentYear--; } document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; this.loadMonthData(); },
+            nextMonth() { this.currentMonth++; if (this.currentMonth > 12) { this.currentMonth = 1; this.currentYear++; } document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; this.loadMonthData(); },
+            currentMonth() { const now = new Date(); this.currentYear = now.getFullYear(); this.currentMonth = now.getMonth() + 1; document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; this.loadMonthData(); },
+            applyTemplate() { const person = document.getElementById('templatePerson').value; const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (!person || !patternStr) { alert('请选择人员并输入模板'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } const rowIndex = this.defaultStaff.indexOf(person); if (rowIndex === -1) return; for (let day = 1; day < startDay; day++) { const stepsBack = startDay - day; const patternIndex = ((pattern.length - (stepsBack % pattern.length)) % pattern.length); let shift = pattern[patternIndex]; const wd = this.getWeekday(this.currentYear, this.currentMonth, day); if (wd === 0 || wd === 6) { if (shift === '白2') shift = '留'; else if (shift !== '夜') shift = '休'; } if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } let normalDayCount = 0, insertWeekStartDay = 0, insertWeekEndDay = 0; for (let day = startDay; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); let shift; if (wd === 5 && (insertWeekStartDay === 0 || day > insertWeekEndDay)) { const patternIndex = normalDayCount % pattern.length; if (pattern[patternIndex] === '白2') { insertWeekStartDay = day + 3; insertWeekEndDay = day + 9; } } if (insertWeekStartDay > 0 && day >= insertWeekStartDay && day <= insertWeekEndDay) { if (wd >= 1 && wd <= 5) shift = '白'; else shift = '休'; } else { const patternIndex = normalDayCount % pattern.length; shift = pattern[patternIndex]; normalDayCount++; if (wd === 0 || wd === 6) { if (shift === '白2') shift = '留'; else if (shift !== '夜') shift = '休'; } } if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); },
+            clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); },
+            autoSchedule() { if (!confirm('确定要按周轮转规则自动生成本月排班吗？这会覆盖现有排班。')) return; const staff = this.defaultStaff; const weekPattern = ['白2', '留', '白3', '夜', '休', '休']; const baseTemplates = []; for (let i = 0; i < 6; i++) { const t = []; for (let d = 0; d < 7; d++) t.push(weekPattern[(i + d) % weekPattern.length]); baseTemplates.push(t); } const longBaiTemplate = ['白', '白', '白', '白', '白', '休', '休']; this.clearAll(true); let queue = null; const savedQueueState = localStorage.getItem('autoScheduleQueueState'); if (savedQueueState) { try { const state = JSON.parse(savedQueueState); const prevMonth = this.currentMonth === 1 ? 12 : this.currentMonth - 1; const prevYear = this.currentMonth === 1 ? this.currentYear - 1 : this.currentYear; if (state.year === prevYear && state.month === prevMonth) { queue = state.queue; } } catch (e) { } } if (!queue) queue = staff.map((_, i) => i); for (let day = 1; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); const dayIndex = wd === 0 ? 6 : wd - 1; for (let r = 0; r < staff.length; r++) { const role = queue.indexOf(r); let shift = role === 6 ? longBaiTemplate[dayIndex] : baseTemplates[role][dayIndex]; if (wd === 0 || wd === 6) { if (shift === '白2') shift = '留'; else if (shift !== '夜') shift = '休'; } this.setShift(r, day, shift, true); } if (wd === 0) { const nextQueue = new Array(7); nextQueue[0] = queue[5]; nextQueue[1] = queue[0]; nextQueue[2] = queue[1]; nextQueue[3] = queue[6]; nextQueue[4] = queue[3]; nextQueue[5] = queue[4]; nextQueue[6] = queue[2]; for (let p = 0; p < 7; p++) queue[p] = nextQueue[p]; } } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); localStorage.setItem('autoScheduleQueueState', JSON.stringify({ year: this.currentYear, month: this.currentMonth, queue })); alert('自动排班已完成！'); },
+            saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
+            exportExcel() { let csv = '姓名,'; for (let d = 1; d <= this.daysInMonth; d++) csv += d + '日,'; csv = csv.slice(0, -1) + '\n'; this.defaultStaff.forEach((name, rowIndex) => { csv += name; for (let col = 1; col <= this.daysInMonth; col++) { const cell = document.getElementById(`t-${rowIndex}-${col}`); csv += ',' + (cell?.textContent || ''); } csv += '\n'; }); const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班表_${this.getMonthKey()}.csv`; a.click(); URL.revokeObjectURL(url); }
+        };
+        window.addEventListener('load', () => app.init());
+    </script>
+</body>
+
+</html>
