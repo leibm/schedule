@@ -1540,13 +1540,19 @@
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
             shareSchedule() {
                 try {
-                    const payload = JSON.stringify(this.scheduleData);
+                    const monthKey = this.getMonthKey();
+                    const monthData = this.scheduleData[monthKey] || {};
+                    const payload = JSON.stringify({ [monthKey]: monthData });
                     const encoded = btoa(encodeURIComponent(payload));
                     this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
                     const encodedUrl = encodeURIComponent(this._shareUrl);
-                    container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
+                    if (this._shareUrl.length > 2000) {
+                        container.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;">排班数据较长，请直接点击下方「复制链接」进行分享</div>';
+                    } else {
+                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
+                    }
                     document.getElementById('shareModal').classList.add('active');
                 } catch (err) {
                     alert('分享失败：' + err.message);
