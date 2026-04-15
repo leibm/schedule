@@ -920,9 +920,9 @@
                 body.style.display = body.style.display === 'none' ? 'block' : 'none';
             },
             getCellBorder(shift, isWeekend) {
-                if (shift === '白3') return '2px solid #cf1322';
-                if (shift === '留' && !isWeekend) return '2px solid #fadb14';
-                if ((shift === '留' || shift === '夜') && isWeekend) return '2px solid #cf1322';
+                if (shift === '白3') return '1px solid #ff7875';
+                if (shift === '留' && !isWeekend) return '1px solid #ffe58f';
+                if ((shift === '留' || shift === '夜') && isWeekend) return '1px solid #ff7875';
                 return '1px solid #e8e8e8';
             },
             getStaffList() { return this.staffOrder || [...this.defaultStaff]; },
