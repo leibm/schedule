@@ -411,6 +411,45 @@
             font-size: 14px;
         }
 
+        .settings-section {
+            margin: 16px 0;
+            padding: 14px;
+            background: #f6ffed;
+            border-radius: 10px;
+        }
+
+        .settings-section h4 {
+            margin: 0;
+            color: #389e0d;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .settings-body {
+            margin-top: 12px;
+        }
+
+        .settings-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .settings-row label {
+            font-size: 13px;
+            color: #333;
+        }
+
+        .settings-row textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
         .template-input {
             display: flex;
             flex-direction: column;
@@ -462,53 +501,6 @@
             background: #e6f7ff;
             outline: 2px dashed #1890ff;
             outline-offset: -2px;
-        }
-
-        .shift-白,
-        .shift-白2,
-        .shift-白3 {
-            background: #e6f7ff;
-            color: #096dd9;
-        }
-
-        .shift-夜 {
-            background: #1a3a5c;
-            color: #fff;
-        }
-
-        .shift-备1 {
-            background: #fff7e6;
-            color: #d46b08;
-        }
-
-        .shift-备2 {
-            background: #ffe7ba;
-            color: #ad6800;
-        }
-
-        .shift-留 {
-            background: #f6ffed;
-            color: #389e0d;
-        }
-
-        .shift-留备1 {
-            background: #d9f7be;
-            color: #237804;
-        }
-
-        .shift-留备2 {
-            background: #b7eb8f;
-            color: #135200;
-        }
-
-        .shift-休 {
-            background: #fff1f0;
-            color: #cf1322;
-        }
-
-        .shift- {
-            background: #fff;
-            color: #999;
         }
 
         .modal-overlay {
@@ -600,6 +592,45 @@
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
 
+            .settings-section {
+                margin: 16px 0;
+                padding: 14px;
+                background: #f6ffed;
+                border-radius: 10px;
+            }
+
+            .settings-section h4 {
+                margin: 0;
+                color: #389e0d;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            .settings-body {
+                margin-top: 12px;
+            }
+
+            .settings-row {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+
+            .settings-row label {
+                font-size: 13px;
+                color: #333;
+            }
+
+            .settings-row textarea {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #d9d9d9;
+                border-radius: 6px;
+                font-size: 14px;
+                resize: vertical;
+            }
+
             .template-input {
                 flex-direction: row;
                 align-items: center;
@@ -685,41 +716,7 @@
                 <button class="btn-primary" onclick="app.autoSchedule()">🤖 自动排班</button>
             </div>
         </div>
-        <div class="shift-legend" id="shiftLegend">
-            <div class="shift-item active" data-shift="白" onclick="app.selectShift('白')">
-                <div class="shift-color shift-白">白</div><span>白班</span>
-            </div>
-            <div class="shift-item" data-shift="白2" onclick="app.selectShift('白2')">
-                <div class="shift-color shift-白2">白2</div><span>白班2</span>
-            </div>
-            <div class="shift-item" data-shift="白3" onclick="app.selectShift('白3')">
-                <div class="shift-color shift-白3">白3</div><span>白班3</span>
-            </div>
-            <div class="shift-item" data-shift="夜" onclick="app.selectShift('夜')">
-                <div class="shift-color shift-夜">夜</div><span>夜班</span>
-            </div>
-            <div class="shift-item" data-shift="备1" onclick="app.selectShift('备1')">
-                <div class="shift-color shift-备1">备1</div><span>备1</span>
-            </div>
-            <div class="shift-item" data-shift="备2" onclick="app.selectShift('备2')">
-                <div class="shift-color shift-备2">备2</div><span>备2</span>
-            </div>
-            <div class="shift-item" data-shift="留" onclick="app.selectShift('留')">
-                <div class="shift-color shift-留">留</div><span>留班</span>
-            </div>
-            <div class="shift-item" data-shift="留备1" onclick="app.selectShift('留备1')">
-                <div class="shift-color shift-留备1">留备1</div><span>留备1</span>
-            </div>
-            <div class="shift-item" data-shift="留备2" onclick="app.selectShift('留备2')">
-                <div class="shift-color shift-留备2">留备2</div><span>留备2</span>
-            </div>
-            <div class="shift-item" data-shift="休" onclick="app.selectShift('休')">
-                <div class="shift-color shift-休">休</div><span>休息</span>
-            </div>
-            <div class="shift-item" data-shift="" onclick="app.selectShift('')">
-                <div class="shift-color shift-">空</div><span>清空</span>
-            </div>
-        </div>
+        <div class="shift-legend" id="shiftLegend"></div>
         <div class="template-section">
             <h4>📝 按模板快速排班</h4>
             <div class="template-input">
@@ -737,6 +734,22 @@
                 </div>
                 <div class="template-row">
                     <button class="btn-primary" onclick="app.applyTemplate()" style="width: 100%;">应用模板</button>
+                </div>
+            </div>
+        </div>
+        <div class="settings-section" id="settingsSection">
+            <h4 onclick="app.toggleSettings()">⚙️ 设置人员名单与班次</h4>
+            <div class="settings-body" id="settingsBody" style="display:none;">
+                <div class="settings-row">
+                    <label>人员名单（每行一个）</label>
+                    <textarea id="settingStaff" rows="7"></textarea>
+                </div>
+                <div class="settings-row">
+                    <label>班次列表（格式：代码:名称，每行一个）</label>
+                    <textarea id="settingShifts" rows="10"></textarea>
+                </div>
+                <div class="settings-row">
+                    <button class="btn-primary" onclick="app.saveSettings()" style="width:100%;">保存设置</button>
                 </div>
             </div>
         </div>
@@ -783,9 +796,9 @@
     </div>
     <script>
         const app = {
-            defaultStaff: ['向锺宁', '陈钰波', '刘成伟', '刘浅予', '雷宝铭', '丁小涵', '徐畅'],
-            shiftTypes: ['白', '白2', '白3', '夜', '备1', '备2', '留', '留备1', '留备2', '休', ''],
-            displayNames: { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '备1': '备1', '备2': '备2', '留': '留班', '留备1': '留备1', '留备2': '留备2', '休': '休息', '': '清空' },
+            defaultStaff: null,
+            shiftTypes: null,
+            displayNames: null,
             holidays: {
                 '2025-01-01': '元旦', '2025-01-28': '春节', '2025-01-29': '春节', '2025-01-30': '春节',
                 '2025-01-31': '春节', '2025-02-01': '春节', '2025-02-02': '春节', '2025-02-03': '春节',
@@ -803,10 +816,11 @@
                 '2026-10-01': '国庆', '2026-10-02': '国庆', '2026-10-03': '国庆', '2026-10-04': '国庆',
                 '2026-10-05': '国庆', '2026-10-06': '国庆', '2026-10-07': '国庆', '2026-10-08': '国庆'
             },
-            currentShift: '白', currentYear: new Date().getFullYear(), currentMonth: new Date().getMonth() + 1,
+            currentShift: '', currentYear: new Date().getFullYear(), currentMonth: new Date().getMonth() + 1,
             scheduleData: {}, daysInMonth: 31, currentView: 'table', editingCell: null, staffOrder: null,
             currentWeekIndex: 0,
             init() {
+                this.loadSettings();
                 document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
                 const savedOrder = localStorage.getItem('staffOrder_v2');
                 if (savedOrder) { try { this.staffOrder = JSON.parse(savedOrder); } catch (e) { } }
@@ -815,7 +829,105 @@
                 if (saved) { try { this.scheduleData = JSON.parse(saved); } catch (e) { } }
                 this.renderStatsSelect();
                 this.renderTemplatePersonSelect();
+                this.renderShiftLegend();
                 this.loadMonthData();
+            },
+            loadSettings() {
+                const staffRaw = localStorage.getItem('customStaff_v1');
+                if (staffRaw) {
+                    try { this.defaultStaff = JSON.parse(staffRaw); } catch (e) { }
+                }
+                if (!this.defaultStaff || !this.defaultStaff.length) this.defaultStaff = ['向锺宁', '陈钰波', '刘成伟', '刘浅予', '雷宝铭', '丁小涵', '徐畅'];
+                const shiftsRaw = localStorage.getItem('customShifts_v1');
+                if (shiftsRaw) {
+                    try { this.shiftTypes = JSON.parse(shiftsRaw).map(s => s.code); this.displayNames = {}; JSON.parse(shiftsRaw).forEach(s => this.displayNames[s.code] = s.name); } catch (e) { }
+                }
+                if (!this.shiftTypes || !this.shiftTypes.length) {
+                    this.shiftTypes = ['白', '白2', '白3', '夜', '备1', '备2', '留', '留备1', '留备2', '休', ''];
+                    this.displayNames = { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '备1': '备1', '备2': '备2', '留': '留班', '留备1': '留备1', '留备2': '留备2', '休': '休息', '': '清空' };
+                }
+                this.dayCode = this.shiftTypes[0] || '白';
+                this.day2Code = this.shiftTypes[1] || '白2';
+                this.day3Code = this.shiftTypes[2] || '白3';
+                this.nightCode = this.shiftTypes[3] || '夜';
+                this.liuCode = this.shiftTypes[6] || '留';
+                this.restCode = this.shiftTypes[9] || '休';
+                this.currentShift = this.shiftTypes[0] || '';
+            },
+            saveSettings() {
+                const staffText = document.getElementById('settingStaff').value.trim();
+                const staffList = staffText.split(/\n/).map(s => s.trim()).filter(s => s);
+                if (staffList.length === 0) { alert('至少需要一名人员'); return; }
+                const shiftText = document.getElementById('settingShifts').value.trim();
+                const shiftLines = shiftText.split(/\n/).map(s => s.trim()).filter(s => s);
+                const shifts = [];
+                shiftLines.forEach(line => {
+                    const idx = line.indexOf(':');
+                    const code = idx >= 0 ? line.slice(0, idx).trim() : line.trim();
+                    const name = idx >= 0 ? line.slice(idx + 1).trim() : line.trim();
+                    if (code) shifts.push({ code, name });
+                });
+                if (shifts.length === 0) { alert('至少需要一个班次'); return; }
+                if (!shifts.some(s => s.code === '')) shifts.push({ code: '', name: '清空' });
+                localStorage.setItem('customStaff_v1', JSON.stringify(staffList));
+                localStorage.setItem('customShifts_v1', JSON.stringify(shifts));
+                this.defaultStaff = staffList;
+                this.shiftTypes = shifts.map(s => s.code);
+                this.displayNames = {}; shifts.forEach(s => this.displayNames[s.code] = s.name);
+                this.staffOrder = null;
+                localStorage.removeItem('staffOrder_v2');
+                this.dayCode = this.shiftTypes[0] || '白';
+                this.day2Code = this.shiftTypes[1] || '白2';
+                this.day3Code = this.shiftTypes[2] || '白3';
+                this.nightCode = this.shiftTypes[3] || '夜';
+                this.liuCode = this.shiftTypes[6] || '留';
+                this.restCode = this.shiftTypes[9] || '休';
+                const defaultPattern = [this.day2Code, this.liuCode, this.day3Code, this.nightCode, this.restCode, this.restCode].join(',');
+                document.getElementById('templatePattern').value = defaultPattern;
+                this.renderShiftLegend();
+                this.renderStatsSelect();
+                this.renderTemplatePersonSelect();
+                this.loadMonthData();
+                alert('设置已保存');
+            },
+            renderShiftLegend() {
+                const container = document.getElementById('shiftLegend');
+                if (!container) return;
+                container.innerHTML = '';
+                this.shiftTypes.forEach((shift, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'shift-item' + (shift === this.currentShift ? ' active' : '');
+                    div.dataset.shift = shift;
+                    div.onclick = () => this.selectShift(shift);
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'shift-color';
+                    colorDiv.textContent = shift || '空';
+                    const style = this.getShiftStyle(shift, i);
+                    colorDiv.style.background = style.bg;
+                    colorDiv.style.color = style.color;
+                    const span = document.createElement('span');
+                    span.textContent = this.displayNames[shift] || shift;
+                    div.appendChild(colorDiv);
+                    div.appendChild(span);
+                    container.appendChild(div);
+                });
+            },
+            getShiftStyle(shift, index) {
+                const pool = [['#e6f7ff', '#096dd9'], ['#fff7e6', '#d46b08'], ['#f6ffed', '#389e0d'], ['#f9f0ff', '#531dab'], ['#fff0f6', '#c41d7f'], ['#e6fffb', '#08979c'], ['#fff2e8', '#ad2102'], ['#f0f5ff', '#1d39c4'], ['#fcffe6', '#5b8c00'], ['#fffbe6', '#ad6800']];
+                const defaults = { '白': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白2': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '白3': { 'bg': '#e6f7ff', 'color': '#096dd9' }, '夜': { 'bg': '#1a3a5c', 'color': '#fff' }, '备1': { 'bg': '#fff7e6', 'color': '#d46b08' }, '备2': { 'bg': '#ffe7ba', 'color': '#ad6800' }, '留': { 'bg': '#f6ffed', 'color': '#389e0d' }, '留备1': { 'bg': '#d9f7be', 'color': '#237804' }, '留备2': { 'bg': '#b7eb8f', 'color': '#135200' }, '休': { 'bg': '#fff1f0', 'color': '#cf1322' }, '': { 'bg': '#fff', 'color': '#999' } };
+                if (shift === '') return { bg: '#fff', color: '#999' };
+                if (defaults[shift]) return defaults[shift];
+                const pair = pool[(Math.abs(shift.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % pool.length)];
+                return { bg: pair[0], color: pair[1] };
+            },
+            toggleSettings() {
+                const body = document.getElementById('settingsBody');
+                if (!body) return;
+                const staffVal = this.defaultStaff.join('\n');
+                const shiftVal = this.shiftTypes.map(code => code + ':' + (this.displayNames[code] || code)).join('\n');
+                document.getElementById('settingStaff').value = staffVal;
+                document.getElementById('settingShifts').value = shiftVal;
+                body.style.display = body.style.display === 'none' ? 'block' : 'none';
             },
             getStaffList() { return this.staffOrder || [...this.defaultStaff]; },
             moveStaff(index, direction) {
@@ -855,7 +967,7 @@
                     if (!isNaN(fromIndex) && fromIndex !== rowIndex) this.dragStaff(fromIndex, rowIndex);
                 });
             },
-            selectShift(shift) { this.currentShift = shift; document.querySelectorAll('.shift-item').forEach(item => { item.classList.toggle('active', item.dataset.shift === shift); }); },
+            selectShift(shift) { this.currentShift = shift; this.renderShiftLegend(); },
             setView(view) {
                 this.currentView = view;
                 document.querySelectorAll('.view-toggle button').forEach((btn, i) => {
@@ -1025,7 +1137,10 @@
                         const key = `${y}-${String(m).padStart(2, '0')}`;
                         const shift = this.scheduleData[key]?.[dataRow]?.[d] || '';
                         td.textContent = shift;
-                        td.classList.add('shift-' + (shift || 'empty'));
+                        const sIdx = this.shiftTypes.indexOf(shift);
+                        const sStyle = this.getShiftStyle(shift, sIdx);
+                        td.style.background = sStyle.bg;
+                        td.style.color = sStyle.color;
                         if (isCurrentMonthOnly) {
                             td.id = `t-${dataRow}-${d}`;
                             td.addEventListener('click', () => this.setShift(dataRow, d, this.currentShift));
@@ -1122,7 +1237,7 @@
                     Object.entries(this.scheduleData[key]).forEach(([row, cols]) => {
                         Object.entries(cols).forEach(([col, shift]) => {
                             const cell = document.getElementById(`w-${row}-${col}`);
-                            if (cell) { cell.textContent = shift; cell.className = 'shift-cell shift-' + (shift || 'empty'); if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg'); }
+                            if (cell) { cell.textContent = shift; const wIdx = this.shiftTypes.indexOf(shift); const wStyle = this.getShiftStyle(shift, wIdx); cell.style.background = wStyle.bg; cell.style.color = wStyle.color; if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg'); }
                         });
                     });
                 }
@@ -1185,37 +1300,39 @@
                 if (!this.scheduleData[key]) this.scheduleData[key] = {};
                 if (!this.scheduleData[key][row]) this.scheduleData[key][row] = {};
                 this.scheduleData[key][row][col] = shift;
-                if (shift === '夜') {
+                if (shift === this.nightCode) {
                     if (col + 1 <= this.daysInMonth) this.scheduleData[key][row][col + 1] = '休';
                     if (col + 2 <= this.daysInMonth) this.scheduleData[key][row][col + 2] = '休';
                 }
                 const tableCell = document.getElementById(`t-${row}-${col}`);
-                if (tableCell) { tableCell.textContent = shift; tableCell.className = 'shift-cell shift-' + (shift || 'empty'); }
+                if (tableCell) { tableCell.textContent = shift; const sIdx = this.shiftTypes.indexOf(shift); const sStyle = this.getShiftStyle(shift, sIdx); tableCell.style.background = sStyle.bg; tableCell.style.color = sStyle.color; }
                 const weekCell = document.getElementById(`w-${row}-${col}`);
-                if (weekCell) { weekCell.textContent = shift; weekCell.className = 'shift-cell shift-' + (shift || 'empty'); }
+                if (weekCell) { weekCell.textContent = shift; const wsIdx = this.shiftTypes.indexOf(shift); const wsStyle = this.getShiftStyle(shift, wsIdx); weekCell.style.background = wsStyle.bg; weekCell.style.color = wsStyle.color; }
                 const cardShift = document.getElementById(`c-${row}-${col}`);
                 const cardWrap = document.getElementById(`c-wrap-${row}-${col}`);
                 if (cardShift && cardWrap) {
                     cardShift.textContent = shift;
-                    cardShift.className = 'day-shift shift-' + (shift || 'empty');
+                    const csIdx = this.shiftTypes.indexOf(shift);
+                    const csStyle = this.getShiftStyle(shift, csIdx);
+                    cardShift.style.background = csStyle.bg;
+                    cardShift.style.color = csStyle.color;
                     const wd = this.getWeekday(this.currentYear, this.currentMonth, col);
                     const holiday = this.isHoliday(this.currentYear, this.currentMonth, col);
                     cardWrap.className = `day-cell ${wd === 0 || wd === 6 ? 'weekend' : ''} ${holiday ? 'holiday' : ''}`;
-                    if (shift) cardWrap.classList.add('shift-' + shift);
                 }
-                if (shift === '夜') {
+                if (shift === this.nightCode) {
                     if (col + 1 <= this.daysInMonth) {
                         const tc = document.getElementById(`t-${row}-${col + 1}`);
                         const wc = document.getElementById(`w-${row}-${col + 1}`);
                         const cs = document.getElementById(`c-${row}-${col + 1}`);
                         const cw = document.getElementById(`c-wrap-${row}-${col + 1}`);
-                        if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; }
-                        if (wc) { wc.textContent = '休'; wc.className = 'shift-cell shift-休'; }
-                        if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; }
+                        if (tc) { tc.textContent = this.restCode; const rIdx = this.shiftTypes.indexOf(this.restCode); const rStyle = this.getShiftStyle(this.restCode, rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; }
+                        if (wc) { wc.textContent = this.restCode; const rIdx2 = this.shiftTypes.indexOf(this.restCode); const rStyle2 = this.getShiftStyle(this.restCode, rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; }
+                        if (cs) { cs.textContent = this.restCode; const rIdx3 = this.shiftTypes.indexOf(this.restCode); const rStyle3 = this.getShiftStyle(this.restCode, rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 1);
                             const h2 = this.isHoliday(this.currentYear, this.currentMonth, col + 1);
-                            cw.className = `day-cell ${wd2 === 0 || wd2 === 6 ? 'weekend' : ''} ${h2 ? 'holiday' : ''} shift-休`;
+                            cw.className = `day-cell ${wd2 === 0 || wd2 === 6 ? 'weekend' : ''} ${h2 ? 'holiday' : ''}`;
                         }
                     }
                     if (col + 2 <= this.daysInMonth) {
@@ -1223,13 +1340,13 @@
                         const wc = document.getElementById(`w-${row}-${col + 2}`);
                         const cs = document.getElementById(`c-${row}-${col + 2}`);
                         const cw = document.getElementById(`c-wrap-${row}-${col + 2}`);
-                        if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; }
-                        if (wc) { wc.textContent = '休'; wc.className = 'shift-cell shift-休'; }
-                        if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; }
+                        if (tc) { tc.textContent = this.restCode; const rIdx = this.shiftTypes.indexOf(this.restCode); const rStyle = this.getShiftStyle(this.restCode, rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; }
+                        if (wc) { wc.textContent = this.restCode; const rIdx2 = this.shiftTypes.indexOf(this.restCode); const rStyle2 = this.getShiftStyle(this.restCode, rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; }
+                        if (cs) { cs.textContent = this.restCode; const rIdx3 = this.shiftTypes.indexOf(this.restCode); const rStyle3 = this.getShiftStyle(this.restCode, rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 2);
                             const h2 = this.isHoliday(this.currentYear, this.currentMonth, col + 2);
-                            cw.className = `day-cell ${wd2 === 0 || wd2 === 6 ? 'weekend' : ''} ${h2 ? 'holiday' : ''} shift-休`;
+                            cw.className = `day-cell ${wd2 === 0 || wd2 === 6 ? 'weekend' : ''} ${h2 ? 'holiday' : ''}`;
                         }
                     }
                 }
@@ -1244,7 +1361,7 @@
                 }
             },
             updateSummary(row) { const key = this.getMonthKey(); const data = this.scheduleData[key]?.[row] || {}; const counts = {}; Object.values(data).forEach(s => { if (s) counts[s] = (counts[s] || 0) + 1; }); const summary = Object.entries(counts).map(([s, c]) => `${s}${c}`).join(' '); document.getElementById(`summary-${row}`).textContent = summary || '未排班'; },
-            openModal(row, col, name) { this.editingCell = { row, col }; document.getElementById('modalTitle').textContent = `${name} · ${this.currentMonth}月${col}日`; const container = document.getElementById('modalShifts'); container.innerHTML = ''; this.shiftTypes.forEach(shift => { const div = document.createElement('div'); div.className = `modal-shift shift-${shift || 'empty'}`; div.textContent = this.displayNames[shift] || '清空'; div.addEventListener('click', () => { this.setShift(row, col, shift); this.closeModal(); }); container.appendChild(div); }); document.getElementById('editModal').classList.add('active'); },
+            openModal(row, col, name) { this.editingCell = { row, col }; document.getElementById('modalTitle').textContent = `${name} · ${this.currentMonth}月${col}日`; const container = document.getElementById('modalShifts'); container.innerHTML = ''; this.shiftTypes.forEach((shift, i) => { const div = document.createElement('div'); div.className = 'modal-shift'; div.textContent = this.displayNames[shift] || '清空'; const sStyle = this.getShiftStyle(shift, i); div.style.background = sStyle.bg; div.style.color = sStyle.color; div.addEventListener('click', () => { this.setShift(row, col, shift); this.closeModal(); }); container.appendChild(div); }); document.getElementById('editModal').classList.add('active'); },
             closeModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('editModal').classList.remove('active'); this.editingCell = null; },
             updateStats() {
                 const sel = document.getElementById('statsPerson');
@@ -1261,16 +1378,16 @@
                 }
                 const grid = document.getElementById('statsGrid');
                 grid.innerHTML = '';
-                const names = { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '备1': '备1', '备2': '备2', '留': '留班', '留备1': '留备1', '留备2': '留备2', '休': '休息' };
+                const names = this.displayNames;
                 Object.entries(stats).forEach(([shift, count]) => { if (count > 0 && shift !== '空') { const card = document.createElement('div'); card.className = 'stat-card'; card.innerHTML = `<div class="stat-label">${names[shift] || shift}</div><div class="stat-value">${count}</div>`; grid.appendChild(card); } });
             },
             applyScheduleData(data) { Object.entries(data).forEach(([row, cols]) => { Object.entries(cols).forEach(([col, shift]) => { this.setShift(parseInt(row), parseInt(col), shift, true); }); }); this.updateStats(); },
             prevMonth() { this.currentMonth--; if (this.currentMonth < 1) { this.currentMonth = 12; this.currentYear--; } document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; this.loadMonthData(); },
             nextMonth() { this.currentMonth++; if (this.currentMonth > 12) { this.currentMonth = 1; this.currentYear++; } document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; this.loadMonthData(); },
             currentMonth() { const now = new Date(); this.currentYear = now.getFullYear(); this.currentMonth = now.getMonth() + 1; document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; this.loadMonthData(); },
-            applyTemplate() { const rowIndex = parseInt(document.getElementById('templatePerson').value, 10); const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (isNaN(rowIndex)) { alert('请选择人员'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } for (let day = 1; day < startDay; day++) { const stepsBack = startDay - day; const patternIndex = ((pattern.length - (stepsBack % pattern.length)) % pattern.length); let shift = pattern[patternIndex]; const wd = this.getWeekday(this.currentYear, this.currentMonth, day); if (wd === 0 || wd === 6) { if (shift === '白2') shift = '留'; else if (shift !== '夜') shift = '休'; } if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } let normalDayCount = 0, insertWeekStartDay = 0, insertWeekEndDay = 0; for (let day = startDay; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); let shift; if (wd === 5 && (insertWeekStartDay === 0 || day > insertWeekEndDay)) { const patternIndex = normalDayCount % pattern.length; if (pattern[patternIndex] === '白2') { insertWeekStartDay = day + 3; insertWeekEndDay = day + 9; } } if (insertWeekStartDay > 0 && day >= insertWeekStartDay && day <= insertWeekEndDay) { if (wd >= 1 && wd <= 5) shift = '白'; else shift = '休'; } else { const patternIndex = normalDayCount % pattern.length; shift = pattern[patternIndex]; normalDayCount++; if (wd === 0 || wd === 6) { if (shift === '白2') shift = '留'; else if (shift !== '夜') shift = '休'; } } if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); },
+            applyTemplate() { const rowIndex = parseInt(document.getElementById('templatePerson').value, 10); const startDay = parseInt(document.getElementById('templateStart').value) || 1; const patternStr = document.getElementById('templatePattern').value.trim(); if (isNaN(rowIndex)) { alert('请选择人员'); return; } const pattern = patternStr.split(/[,，]/).map(s => s.trim()).filter(s => s); if (pattern.length === 0) { alert('模板格式错误'); return; } for (let day = 1; day < startDay; day++) { const stepsBack = startDay - day; const patternIndex = ((pattern.length - (stepsBack % pattern.length)) % pattern.length); let shift = pattern[patternIndex]; const wd = this.getWeekday(this.currentYear, this.currentMonth, day); if (wd === 0 || wd === 6) { if (shift === this.day2Code) shift = this.liuCode; else if (shift !== this.nightCode) shift = this.restCode; } if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } let normalDayCount = 0, insertWeekStartDay = 0, insertWeekEndDay = 0; for (let day = startDay; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); let shift; if (wd === 5 && (insertWeekStartDay === 0 || day > insertWeekEndDay)) { const patternIndex = normalDayCount % pattern.length; if (pattern[patternIndex] === this.day2Code) { insertWeekStartDay = day + 3; insertWeekEndDay = day + 9; } } if (insertWeekStartDay > 0 && day >= insertWeekStartDay && day <= insertWeekEndDay) { if (wd >= 1 && wd <= 5) shift = this.dayCode; else shift = this.restCode; } else { const patternIndex = normalDayCount % pattern.length; shift = pattern[patternIndex]; normalDayCount++; if (wd === 0 || wd === 6) { if (shift === this.day2Code) shift = this.liuCode; else if (shift !== this.nightCode) shift = this.restCode; } } if (this.shiftTypes.includes(shift)) this.setShift(rowIndex, day, shift, true); } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); },
             clearAll(skipConfirm) { if (!skipConfirm && !confirm('确定要清空本月所有排班吗？')) return; this.defaultStaff.forEach((_, row) => { for (let col = 1; col <= this.daysInMonth; col++) this.setShift(row, col, '', true); }); this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); },
-            autoSchedule() { if (!confirm('确定要按周轮转规则自动生成本月排班吗？这会覆盖现有排班。')) return; const staff = this.defaultStaff; const weekPattern = ['白2', '留', '白3', '夜', '休', '休']; const baseTemplates = []; for (let i = 0; i < 6; i++) { const t = []; for (let d = 0; d < 7; d++) t.push(weekPattern[(i + d) % weekPattern.length]); baseTemplates.push(t); } const longBaiTemplate = ['白', '白', '白', '白', '白', '休', '休']; this.clearAll(true); let queue = null; const savedQueueState = localStorage.getItem('autoScheduleQueueState'); if (savedQueueState) { try { const state = JSON.parse(savedQueueState); const prevMonth = this.currentMonth === 1 ? 12 : this.currentMonth - 1; const prevYear = this.currentMonth === 1 ? this.currentYear - 1 : this.currentYear; if (state.year === prevYear && state.month === prevMonth) { queue = state.queue; } } catch (e) { } } if (!queue) queue = staff.map((_, i) => i); for (let day = 1; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); const dayIndex = wd === 0 ? 6 : wd - 1; for (let r = 0; r < staff.length; r++) { const role = queue.indexOf(r); let shift = role === 6 ? longBaiTemplate[dayIndex] : baseTemplates[role][dayIndex]; if (wd === 0 || wd === 6) { if (shift === '白2') shift = '留'; else if (shift !== '夜') shift = '休'; } this.setShift(r, day, shift, true); } if (wd === 0) { const nextQueue = new Array(7); nextQueue[0] = queue[5]; nextQueue[1] = queue[0]; nextQueue[2] = queue[1]; nextQueue[3] = queue[6]; nextQueue[4] = queue[3]; nextQueue[5] = queue[4]; nextQueue[6] = queue[2]; for (let p = 0; p < 7; p++) queue[p] = nextQueue[p]; } } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); localStorage.setItem('autoScheduleQueueState', JSON.stringify({ year: this.currentYear, month: this.currentMonth, queue })); alert('自动排班已完成！'); },
+            autoSchedule() { if (!confirm('确定要按周轮转规则自动生成本月排班吗？这会覆盖现有排班。')) return; const staff = this.defaultStaff; const weekPattern = [this.day2Code, this.liuCode, this.day3Code, this.nightCode, this.restCode, this.restCode]; const baseTemplates = []; for (let i = 0; i < 6; i++) { const t = []; for (let d = 0; d < 7; d++) t.push(weekPattern[(i + d) % weekPattern.length]); baseTemplates.push(t); } const longBaiTemplate = [this.dayCode, this.dayCode, this.dayCode, this.dayCode, this.dayCode, this.restCode, this.restCode]; this.clearAll(true); let queue = null; const savedQueueState = localStorage.getItem('autoScheduleQueueState'); if (savedQueueState) { try { const state = JSON.parse(savedQueueState); const prevMonth = this.currentMonth === 1 ? 12 : this.currentMonth - 1; const prevYear = this.currentMonth === 1 ? this.currentYear - 1 : this.currentYear; if (state.year === prevYear && state.month === prevMonth) { queue = state.queue; } } catch (e) { } } if (!queue) queue = staff.map((_, i) => i); for (let day = 1; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); const dayIndex = wd === 0 ? 6 : wd - 1; for (let r = 0; r < staff.length; r++) { const role = queue.indexOf(r); let shift = role === 6 ? longBaiTemplate[dayIndex] : baseTemplates[role][dayIndex]; if (wd === 0 || wd === 6) { if (shift === this.day2Code) shift = this.liuCode; else if (shift !== this.nightCode) shift = this.restCode; } this.setShift(r, day, shift, true); } if (wd === 0) { const nextQueue = new Array(7); nextQueue[0] = queue[5]; nextQueue[1] = queue[0]; nextQueue[2] = queue[1]; nextQueue[3] = queue[6]; nextQueue[4] = queue[3]; nextQueue[5] = queue[4]; nextQueue[6] = queue[2]; for (let p = 0; p < 7; p++) queue[p] = nextQueue[p]; } } this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); localStorage.setItem('autoScheduleQueueState', JSON.stringify({ year: this.currentYear, month: this.currentMonth, queue })); alert('自动排班已完成！'); },
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
             exportExcel() { let csv = '姓名,'; for (let d = 1; d <= this.daysInMonth; d++) csv += d + '日,'; csv = csv.slice(0, -1) + '\n'; const key = this.getMonthKey(); this.defaultStaff.forEach((name, rowIndex) => { csv += name; for (let col = 1; col <= this.daysInMonth; col++) { const shift = this.scheduleData[key]?.[rowIndex]?.[col] || ''; csv += ',' + shift; } csv += '\n'; }); const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班表_${this.getMonthKey()}.csv`; a.click(); URL.revokeObjectURL(url); }
         };
