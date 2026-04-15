@@ -3,13 +3,87 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=scheduler_v4.html">
     <title>影像科排班系统</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 24px 32px;
+            margin: 10px;
+            width: 280px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .card small {
+            color: #888;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
 </head>
 
 <body>
-    <p>正在跳转至排班系统...</p>
-    <p>如果没有自动跳转，请 <a href="scheduler_v4.html">点击这里</a>。</p>
+    <h1>📅 排班系统</h1>
+    <p>请选择要使用的版本</p>
+    <div class="row">
+        <a class="card" href="scheduler_v4.html">
+            <h3>🖥️ 桌面版</h3>
+            <small>七人团队专用版</small>
+        </a>
+        <a class="card" href="scheduler_mobile.html">
+            <h3>📱 手机版</h3>
+            <small>七人团队专用版</small>
+        </a>
+        <a class="card" href="scheduler_generic.html">
+            <h3>🧩 通用版</h3>
+            <small>自定义人员、班次与模板</small>
+        </a>
+        <a class="card" href="scheduler_generic_mobile.html">
+            <h3>📱 通用手机版</h3>
+            <small>自定义人员、班次与模板</small>
+        </a>
+    </div>
 </body>
 
 </html>
