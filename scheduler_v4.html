@@ -773,8 +773,7 @@
             },
             dragStaff(fromIndex, toIndex) {
                 const list = this.getStaffList();
-                const [moved] = list.splice(fromIndex, 1);
-                list.splice(toIndex, 0, moved);
+                [list[fromIndex], list[toIndex]] = [list[toIndex], list[fromIndex]];
                 this.staffOrder = list;
                 localStorage.setItem('staffOrder_v2', JSON.stringify(list));
                 this.loadMonthData();
