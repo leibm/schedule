@@ -114,4 +114,4 @@ def patch_file(path):
 
 if __name__ == '__main__':
     patch_file('scheduler_v4.html')
-    patch_file('影像科月度排班系统_手机版.html')
+    patch_file('scheduler_mobile.html')
