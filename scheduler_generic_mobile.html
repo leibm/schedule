@@ -1545,12 +1545,8 @@
                     this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
-                    try {
-                        new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
-                    } catch (qrErr) {
-                        const encodedUrl = encodeURIComponent(this._shareUrl);
-                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
-                    }
+                    const encodedUrl = encodeURIComponent(this._shareUrl);
+                    container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
                     document.getElementById('shareModal').classList.add('active');
                 } catch (err) {
                     alert('分享失败：' + err.message);

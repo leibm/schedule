@@ -733,6 +733,12 @@
             </div>
         </div>
         <div class="shift-legend" id="shiftLegend"></div>
+        <div style="font-size:12px;color:#666;margin:-8px 0 12px 0;padding:0 4px;">
+            <span
+                style="text-decoration:underline;text-decoration-color:#ff7875;text-decoration-thickness:2px;text-underline-offset:2px;">红色线段</span>代表备1，
+            <span
+                style="text-decoration:underline;text-decoration-color:#fadb14;text-decoration-thickness:2px;text-underline-offset:2px;">黄色线段</span>代表备2
+        </div>
         <div class="template-section">
             <h4>📝 按模板快速排班</h4>
             <div class="template-input">
@@ -1413,6 +1419,7 @@
                     const csStyle = this.getShiftStyle(shift, csIdx);
                     cardShift.style.background = csStyle.bg;
                     cardShift.style.color = csStyle.color;
+                    cardShift.style.cssText += this.getUnderlineStyle(shift, isWeekend);
                     const wd = this.getWeekday(this.currentYear, this.currentMonth, col);
                     const holiday = this.isHoliday(this.currentYear, this.currentMonth, col);
                     cardWrap.className = `day-cell ${wd === 0 || wd === 6 ? 'weekend' : ''} ${holiday ? (holiday.off ? 'holiday' : 'festival') : ''}`;
@@ -1425,7 +1432,7 @@
                         const cw = document.getElementById(`c-wrap-${row}-${col + 1}`);
                         if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; tc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; wc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
-                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
+                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; cs.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 1);
                             const h2 = this.isHoliday(this.currentYear, this.currentMonth, col + 1);
@@ -1439,7 +1446,7 @@
                         const cw = document.getElementById(`c-wrap-${row}-${col + 2}`);
                         if (tc) { tc.textContent = '休'; const rIdx = this.shiftTypes.indexOf('休'); const rStyle = this.getShiftStyle('休', rIdx); tc.style.background = rStyle.bg; tc.style.color = rStyle.color; tc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (wc) { wc.textContent = '休'; const rIdx2 = this.shiftTypes.indexOf('休'); const rStyle2 = this.getShiftStyle('休', rIdx2); wc.style.background = rStyle2.bg; wc.style.color = rStyle2.color; wc.style.cssText += this.getUnderlineStyle('休', isWeekend); }
-                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; }
+                        if (cs) { cs.textContent = '休'; const rIdx3 = this.shiftTypes.indexOf('休'); const rStyle3 = this.getShiftStyle('休', rIdx3); cs.style.background = rStyle3.bg; cs.style.color = rStyle3.color; cs.style.cssText += this.getUnderlineStyle('休', isWeekend); }
                         if (cw) {
                             const wd2 = this.getWeekday(this.currentYear, this.currentMonth, col + 2);
                             const h2 = this.isHoliday(this.currentYear, this.currentMonth, col + 2);
@@ -1518,12 +1525,8 @@
                     this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
-                    try {
-                        new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
-                    } catch (qrErr) {
-                        const encodedUrl = encodeURIComponent(this._shareUrl);
-                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
-                    }
+                    const encodedUrl = encodeURIComponent(this._shareUrl);
+                    container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" alt="二维码" style="width:200px;height:200px;border-radius:8px;">';
                     document.getElementById('shareModal').classList.add('active');
                 } catch (err) {
                     alert('分享失败：' + err.message);
