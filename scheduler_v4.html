@@ -692,6 +692,7 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -810,6 +811,16 @@
             <div class="modal-title" id="modalTitle">选择班次</div>
             <div class="modal-shifts" id="modalShifts"></div>
             <button class="modal-cancel" onclick="app.closeModal()">取消</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="shareModal" onclick="app.closeShareModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
+            <div class="modal-title">分享排班</div>
+            <div id="qrcode" style="margin:12px auto; display:inline-block;"></div>
+            <div style="margin-bottom:12px;">
+                <button class="btn-primary" onclick="app.copyShareLink()">复制链接</button>
+                <button class="modal-cancel" onclick="app.closeShareModal()">关闭</button>
+            </div>
         </div>
     </div>
     <script>
@@ -1477,11 +1488,22 @@
             shareSchedule() {
                 const payload = JSON.stringify(this.scheduleData);
                 const encoded = btoa(encodeURIComponent(payload));
-                const shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert('分享链接已复制到剪贴板！');
+                this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+                const container = document.getElementById('qrcode');
+                container.innerHTML = '';
+                new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
+                document.getElementById('shareModal').classList.add('active');
+            },
+            closeShareModal(e) {
+                if (e && e.target !== e.currentTarget) return;
+                document.getElementById('shareModal').classList.remove('active');
+            },
+            copyShareLink() {
+                if (!this._shareUrl) return;
+                navigator.clipboard.writeText(this._shareUrl).then(() => {
+                    alert('链接已复制到剪贴板！');
                 }).catch(() => {
-                    prompt('请复制以下链接进行分享', shareUrl);
+                    prompt('请复制以下链接', this._shareUrl);
                 });
             },
             loadSchedule() {
