@@ -224,12 +224,43 @@
             color: #cf1322;
         }
 
+        .schedule-table td.weekend-bg {
+            background: #fff9f9;
+        }
+
         .card-view {
             display: none;
         }
 
         .card-view.active {
             display: block;
+        }
+
+        .week-view {
+            display: none;
+        }
+
+        .week-view.active {
+            display: block;
+        }
+
+        .week-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            gap: 8px;
+        }
+
+        .week-toolbar span {
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+            flex: 1;
+            text-align: center;
         }
 
         .staff-card {
@@ -391,6 +422,20 @@
             font-size: 12px;
         }
 
+        .name-cell[draggable="true"] {
+            cursor: grab;
+        }
+
+        .name-cell.dragging {
+            opacity: 0.5;
+        }
+
+        .name-cell.drag-over {
+            background: #e6f7ff;
+            outline: 2px dashed #1890ff;
+            outline-offset: -2px;
+        }
+
         .shift-白,
         .shift-白2,
         .shift-白3 {
@@ -548,7 +593,8 @@
             .toolbar,
             .stats-panel,
             .template-section,
-            .view-toggle {
+            .view-toggle,
+            .week-toolbar {
                 display: none !important;
             }
 
@@ -556,7 +602,8 @@
                 display: block !important;
             }
 
-            .card-view {
+            .card-view,
+            .week-view {
                 display: none !important;
             }
 
@@ -578,6 +625,7 @@
         <div class="view-toggle" id="viewToggle">
             <button class="active" onclick="app.setView('table')">📊 表格</button>
             <button onclick="app.setView('card')">🃏 卡片</button>
+            <button onclick="app.setView('week')">📅 周视图</button>
         </div>
         <div class="toolbar">
             <div class="toolbar-group">
@@ -669,6 +717,20 @@
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
+        <div class="week-view" id="weekView">
+            <div class="week-toolbar">
+                <button class="btn-secondary" onclick="app.prevWeek()">← 上周</button>
+                <span id="weekLabel"></span>
+                <button class="btn-secondary" onclick="app.currentWeek()">本周</button>
+                <button class="btn-secondary" onclick="app.nextWeek()">下周 →</button>
+            </div>
+            <div class="table-wrapper" style="display:block;">
+                <table class="schedule-table" id="weekTable">
+                    <thead id="weekHead"></thead>
+                    <tbody id="weekBody"></tbody>
+                </table>
+            </div>
+        </div>
         <div class="card-view" id="cardView"></div>
         <div class="stats-panel">
             <h3 style="font-size: 14px;">📈 本月统计</h3>
@@ -689,6 +751,7 @@
             displayNames: { '白': '白班', '白2': '白班2', '白3': '白班3', '夜': '夜班', '备1': '备1', '备2': '备2', '留': '留班', '留备1': '留备1', '留备2': '留备2', '休': '休息', '': '清空' },
             currentShift: '白', currentYear: new Date().getFullYear(), currentMonth: new Date().getMonth() + 1,
             scheduleData: {}, daysInMonth: 31, currentView: 'table', editingCell: null, staffOrder: null,
+            currentWeekIndex: 0,
             init() {
                 document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
                 const savedOrder = localStorage.getItem('staffOrder_v2');
@@ -708,16 +771,292 @@
                 localStorage.setItem('staffOrder_v2', JSON.stringify(list));
                 this.loadMonthData();
             },
+            dragStaff(fromIndex, toIndex) {
+                const list = this.getStaffList();
+                const [moved] = list.splice(fromIndex, 1);
+                list.splice(toIndex, 0, moved);
+                this.staffOrder = list;
+                localStorage.setItem('staffOrder_v2', JSON.stringify(list));
+                this.loadMonthData();
+            },
+            bindDragEvents(el, rowIndex) {
+                el.draggable = true;
+                el.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', rowIndex);
+                    el.classList.add('dragging');
+                });
+                el.addEventListener('dragend', () => el.classList.remove('dragging'));
+                el.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    el.classList.add('drag-over');
+                });
+                el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    el.classList.remove('drag-over');
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                    if (!isNaN(fromIndex) && fromIndex !== rowIndex) this.dragStaff(fromIndex, rowIndex);
+                });
+            },
             selectShift(shift) { this.currentShift = shift; document.querySelectorAll('.shift-item').forEach(item => { item.classList.toggle('active', item.dataset.shift === shift); }); },
-            setView(view) { this.currentView = view; document.querySelectorAll('.view-toggle button').forEach((btn, i) => { btn.classList.toggle('active', (view === 'table' && i === 0) || (view === 'card' && i === 1)); }); document.getElementById('tableView').classList.toggle('active', view === 'table'); document.getElementById('cardView').classList.toggle('active', view === 'card'); },
+            setView(view) {
+                this.currentView = view;
+                document.querySelectorAll('.view-toggle button').forEach((btn, i) => {
+                    btn.classList.toggle('active', (view === 'table' && i === 0) || (view === 'card' && i === 1) || (view === 'week' && i === 2));
+                });
+                document.getElementById('tableView').classList.toggle('active', view === 'table');
+                document.getElementById('cardView').classList.toggle('active', view === 'card');
+                document.getElementById('weekView').classList.toggle('active', view === 'week');
+                if (view === 'week') this.renderWeekView();
+            },
             onMonthChange(value) { const [y, m] = value.split('-').map(Number); this.currentYear = y; this.currentMonth = m; this.loadMonthData(); },
             getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); },
             getWeekday(year, month, day) { return new Date(year, month - 1, day).getDay(); },
             getMonthKey() { return `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`; },
-            loadMonthData() { this.daysInMonth = this.getDaysInMonth(this.currentYear, this.currentMonth); this.renderTable(); this.renderCards(); const key = this.getMonthKey(); if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]); this.updateStats(); },
-            renderTable() { const thead = document.getElementById('tableHead'), tbody = document.getElementById('tableBody'); const weekNames = ['日', '一', '二', '三', '四', '五', '六']; let headHTML = '<tr><th class="name-header">姓名</th>'; for (let d = 1; d <= this.daysInMonth; d++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, d); headHTML += `<th class="${wd === 0 || wd === 6 ? 'weekend' : ''}">${d}<br><small>${weekNames[wd]}</small></th>`; } headHTML += '</tr>'; thead.innerHTML = headHTML; tbody.innerHTML = ''; this.defaultStaff.forEach((name, rowIndex) => { const tr = document.createElement('tr'); const nameTd = document.createElement('td'); nameTd.className = 'name-cell'; nameTd.textContent = name; tr.appendChild(nameTd); for (let col = 1; col <= this.daysInMonth; col++) { const td = document.createElement('td'); td.className = 'shift-cell'; td.id = `t-${rowIndex}-${col}`; td.addEventListener('click', () => this.setShift(rowIndex, col, this.currentShift)); tr.appendChild(td); } tbody.appendChild(tr); }); },
-            renderCards() { const cardView = document.getElementById('cardView'); cardView.innerHTML = ''; this.defaultStaff.forEach((name, rowIndex) => { const card = document.createElement('div'); card.className = 'staff-card'; card.innerHTML = `<div class="staff-card-header"><span class="staff-name">${name}</span><span class="staff-summary" id="summary-${rowIndex}">未排班</span></div><div class="days-grid" id="days-grid-${rowIndex}"></div>`; cardView.appendChild(card); const grid = card.querySelector('.days-grid'); for (let day = 1; day <= this.daysInMonth; day++) { const wd = this.getWeekday(this.currentYear, this.currentMonth, day); const isWeekend = wd === 0 || wd === 6; const cell = document.createElement('div'); cell.className = `day-cell ${isWeekend ? 'weekend' : ''}`; cell.id = `c-wrap-${rowIndex}-${day}`; cell.innerHTML = `<span class="day-number ${isWeekend ? 'weekend-day' : ''}">${day}</span><span class="day-shift" id="c-${rowIndex}-${day}"></span>`; cell.addEventListener('click', () => this.openModal(rowIndex, day, name)); grid.appendChild(cell); } }); },
-            setShift(row, col, shift, skipSave) { const key = this.getMonthKey(); if (!this.scheduleData[key]) this.scheduleData[key] = {}; if (!this.scheduleData[key][row]) this.scheduleData[key][row] = {}; this.scheduleData[key][row][col] = shift; if (shift === '夜') { if (col + 1 <= this.daysInMonth) this.scheduleData[key][row][col + 1] = '休'; if (col + 2 <= this.daysInMonth) this.scheduleData[key][row][col + 2] = '休'; } const tableCell = document.getElementById(`t-${row}-${col}`); if (tableCell) { tableCell.textContent = shift; tableCell.className = 'shift-cell shift-' + (shift || 'empty'); } const cardShift = document.getElementById(`c-${row}-${col}`); const cardWrap = document.getElementById(`c-wrap-${row}-${col}`); if (cardShift && cardWrap) { cardShift.textContent = shift; cardShift.className = 'day-shift shift-' + (shift || 'empty'); const wd = this.getWeekday(this.currentYear, this.currentMonth, col); cardWrap.className = `day-cell ${wd === 0 || wd === 6 ? 'weekend' : ''}`; if (shift) cardWrap.classList.add('shift-' + shift); } if (shift === '夜') { if (col + 1 <= this.daysInMonth) { const tc = document.getElementById(`t-${row}-${col + 1}`); const cs = document.getElementById(`c-${row}-${col + 1}`); const cw = document.getElementById(`c-wrap-${row}-${col + 1}`); if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; } if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; } if (cw) cw.className = 'day-cell shift-休'; } if (col + 2 <= this.daysInMonth) { const tc = document.getElementById(`t-${row}-${col + 2}`); const cs = document.getElementById(`c-${row}-${col + 2}`); const cw = document.getElementById(`c-wrap-${row}-${col + 2}`); if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; } if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; } if (cw) cw.className = 'day-cell shift-休'; } } this.updateSummary(row); if (!skipSave) { this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); } },
+            getWeeksInMonth() {
+                const weeks = [];
+                const firstDay = new Date(this.currentYear, this.currentMonth - 1, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth - 1, this.daysInMonth);
+                let current = new Date(firstDay);
+                const dayOfWeek = current.getDay();
+                const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+                current.setDate(current.getDate() + diffToMon);
+                while (current <= lastDay) {
+                    const weekDays = [];
+                    for (let i = 0; i < 7; i++) {
+                        weekDays.push(new Date(current));
+                        current.setDate(current.getDate() + 1);
+                    }
+                    weeks.push(weekDays);
+                }
+                return weeks;
+            },
+            loadMonthData() {
+                this.daysInMonth = this.getDaysInMonth(this.currentYear, this.currentMonth);
+                const weeks = this.getWeeksInMonth();
+                const now = new Date();
+                if (now.getFullYear() === this.currentYear && now.getMonth() + 1 === this.currentMonth) {
+                    const nowTs = now.setHours(0, 0, 0, 0);
+                    const idx = weeks.findIndex(w => {
+                        const start = new Date(w[0]).setHours(0, 0, 0, 0);
+                        const end = new Date(w[6]).setHours(23, 59, 59, 999);
+                        return nowTs >= start && nowTs <= end;
+                    });
+                    this.currentWeekIndex = idx >= 0 ? idx : 0;
+                } else {
+                    this.currentWeekIndex = 0;
+                }
+                this.renderTable();
+                this.renderCards();
+                if (this.currentView === 'week') this.renderWeekView();
+                const key = this.getMonthKey();
+                if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]);
+                this.updateStats();
+            },
+            renderTable() {
+                const thead = document.getElementById('tableHead'), tbody = document.getElementById('tableBody');
+                const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
+                let headHTML = '<tr><th class="name-header">姓名</th>';
+                for (let d = 1; d <= this.daysInMonth; d++) {
+                    const wd = this.getWeekday(this.currentYear, this.currentMonth, d);
+                    headHTML += `<th class="${wd === 0 || wd === 6 ? 'weekend' : ''}">${d}<br><small>${weekNames[wd]}</small></th>`;
+                }
+                headHTML += '</tr>';
+                thead.innerHTML = headHTML;
+                tbody.innerHTML = '';
+                const staffList = this.getStaffList();
+                staffList.forEach((name, displayRow) => {
+                    const dataRow = this.defaultStaff.indexOf(name);
+                    const tr = document.createElement('tr');
+                    const nameTd = document.createElement('td');
+                    nameTd.className = 'name-cell';
+                    nameTd.textContent = name;
+                    this.bindDragEvents(nameTd, displayRow);
+                    tr.appendChild(nameTd);
+                    for (let col = 1; col <= this.daysInMonth; col++) {
+                        const td = document.createElement('td');
+                        td.className = 'shift-cell';
+                        td.id = `t-${dataRow}-${col}`;
+                        td.addEventListener('click', () => this.setShift(dataRow, col, this.currentShift));
+                        tr.appendChild(td);
+                    }
+                    tbody.appendChild(tr);
+                });
+            },
+            renderCards() {
+                const cardView = document.getElementById('cardView');
+                cardView.innerHTML = '';
+                const staffList = this.getStaffList();
+                staffList.forEach((name) => {
+                    const dataRow = this.defaultStaff.indexOf(name);
+                    const card = document.createElement('div');
+                    card.className = 'staff-card';
+                    card.innerHTML = `<div class="staff-card-header"><span class="staff-name">${name}</span><span class="staff-summary" id="summary-${dataRow}">未排班</span></div><div class="days-grid" id="days-grid-${dataRow}"></div>`;
+                    cardView.appendChild(card);
+                    const grid = card.querySelector('.days-grid');
+                    for (let day = 1; day <= this.daysInMonth; day++) {
+                        const wd = this.getWeekday(this.currentYear, this.currentMonth, day);
+                        const isWeekend = wd === 0 || wd === 6;
+                        const cell = document.createElement('div');
+                        cell.className = `day-cell ${isWeekend ? 'weekend' : ''}`;
+                        cell.id = `c-wrap-${dataRow}-${day}`;
+                        cell.innerHTML = `<span class="day-number ${isWeekend ? 'weekend-day' : ''}">${day}</span><span class="day-shift" id="c-${dataRow}-${day}"></span>`;
+                        cell.addEventListener('click', () => this.openModal(dataRow, day, name));
+                        grid.appendChild(cell);
+                    }
+                });
+            },
+            renderWeekView() {
+                const weeks = this.getWeeksInMonth();
+                if (this.currentWeekIndex >= weeks.length) this.currentWeekIndex = weeks.length - 1;
+                if (this.currentWeekIndex < 0) this.currentWeekIndex = 0;
+                const week = weeks[this.currentWeekIndex];
+                const weekNames = ['一', '二', '三', '四', '五', '六', '日'];
+                const thead = document.getElementById('weekHead');
+                const tbody = document.getElementById('weekBody');
+                let headHTML = '<tr><th class="name-header">姓名</th>';
+                week.forEach((date, i) => {
+                    const isWeekend = i >= 5;
+                    const isCurrentMonth = date.getMonth() + 1 === this.currentMonth;
+                    const opacity = isCurrentMonth ? '' : 'opacity:0.5;';
+                    headHTML += `<th class="${isWeekend ? 'weekend' : ''}" style="${opacity}">${date.getDate()}日<br><small>周${weekNames[i]}</small></th>`;
+                });
+                headHTML += '</tr>';
+                thead.innerHTML = headHTML;
+                tbody.innerHTML = '';
+                const staffList = this.getStaffList();
+                staffList.forEach((name, displayRow) => {
+                    const dataRow = this.defaultStaff.indexOf(name);
+                    const tr = document.createElement('tr');
+                    const nameTd = document.createElement('td');
+                    nameTd.className = 'name-cell';
+                    nameTd.textContent = name;
+                    this.bindDragEvents(nameTd, displayRow);
+                    tr.appendChild(nameTd);
+                    week.forEach((date) => {
+                        const day = date.getDate();
+                        const isCurrentMonth = date.getMonth() + 1 === this.currentMonth;
+                        const realWd = date.getDay();
+                        const td = document.createElement('td');
+                        td.className = 'shift-cell';
+                        if (realWd === 0 || realWd === 6) td.classList.add('weekend-bg');
+                        td.id = `w-${dataRow}-${day}`;
+                        td.style.opacity = isCurrentMonth ? '' : '0.4';
+                        if (isCurrentMonth) {
+                            td.addEventListener('click', () => this.setShift(dataRow, day, this.currentShift));
+                        }
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                const label = document.getElementById('weekLabel');
+                if (label) {
+                    const start = week[0];
+                    const end = week[6];
+                    label.textContent = `${start.getMonth() + 1}月${start.getDate()}日 ~ ${end.getMonth() + 1}月${end.getDate()}日`;
+                }
+                const key = this.getMonthKey();
+                if (this.scheduleData[key]) {
+                    Object.entries(this.scheduleData[key]).forEach(([row, cols]) => {
+                        Object.entries(cols).forEach(([col, shift]) => {
+                            const cell = document.getElementById(`w-${row}-${col}`);
+                            if (cell) { cell.textContent = shift; cell.className = 'shift-cell shift-' + (shift || 'empty'); if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg'); }
+                        });
+                    });
+                }
+            },
+            prevWeek() {
+                if (this.currentWeekIndex > 0) {
+                    this.currentWeekIndex--;
+                    this.renderWeekView();
+                    return;
+                }
+                this.currentMonth--;
+                if (this.currentMonth < 1) { this.currentMonth = 12; this.currentYear--; }
+                document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+                this.daysInMonth = this.getDaysInMonth(this.currentYear, this.currentMonth);
+                this.renderTable();
+                this.renderCards();
+                const weeks = this.getWeeksInMonth();
+                this.currentWeekIndex = weeks.length - 1;
+                this.renderWeekView();
+                const key = this.getMonthKey();
+                if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]);
+                this.updateStats();
+            },
+            nextWeek() {
+                const weeks = this.getWeeksInMonth();
+                if (this.currentWeekIndex < weeks.length - 1) {
+                    this.currentWeekIndex++;
+                    this.renderWeekView();
+                    return;
+                }
+                this.currentMonth++;
+                if (this.currentMonth > 12) { this.currentMonth = 1; this.currentYear++; }
+                document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+                this.daysInMonth = this.getDaysInMonth(this.currentYear, this.currentMonth);
+                this.renderTable();
+                this.renderCards();
+                this.currentWeekIndex = 0;
+                this.renderWeekView();
+                const key = this.getMonthKey();
+                if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]);
+                this.updateStats();
+            },
+            currentWeek() {
+                const now = new Date();
+                this.currentYear = now.getFullYear();
+                this.currentMonth = now.getMonth() + 1;
+                document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+                this.loadMonthData();
+            },
+            setShift(row, col, shift, skipSave) {
+                const key = this.getMonthKey();
+                if (!this.scheduleData[key]) this.scheduleData[key] = {};
+                if (!this.scheduleData[key][row]) this.scheduleData[key][row] = {};
+                this.scheduleData[key][row][col] = shift;
+                if (shift === '夜') {
+                    if (col + 1 <= this.daysInMonth) this.scheduleData[key][row][col + 1] = '休';
+                    if (col + 2 <= this.daysInMonth) this.scheduleData[key][row][col + 2] = '休';
+                }
+                const tableCell = document.getElementById(`t-${row}-${col}`);
+                if (tableCell) { tableCell.textContent = shift; tableCell.className = 'shift-cell shift-' + (shift || 'empty'); }
+                const weekCell = document.getElementById(`w-${row}-${col}`);
+                if (weekCell) { weekCell.textContent = shift; weekCell.className = 'shift-cell shift-' + (shift || 'empty'); }
+                const cardShift = document.getElementById(`c-${row}-${col}`);
+                const cardWrap = document.getElementById(`c-wrap-${row}-${col}`);
+                if (cardShift && cardWrap) {
+                    cardShift.textContent = shift;
+                    cardShift.className = 'day-shift shift-' + (shift || 'empty');
+                    const wd = this.getWeekday(this.currentYear, this.currentMonth, col);
+                    cardWrap.className = `day-cell ${wd === 0 || wd === 6 ? 'weekend' : ''}`;
+                    if (shift) cardWrap.classList.add('shift-' + shift);
+                }
+                if (shift === '夜') {
+                    if (col + 1 <= this.daysInMonth) {
+                        const tc = document.getElementById(`t-${row}-${col + 1}`);
+                        const wc = document.getElementById(`w-${row}-${col + 1}`);
+                        const cs = document.getElementById(`c-${row}-${col + 1}`);
+                        const cw = document.getElementById(`c-wrap-${row}-${col + 1}`);
+                        if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; }
+                        if (wc) { wc.textContent = '休'; wc.className = 'shift-cell shift-休'; }
+                        if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; }
+                        if (cw) cw.className = 'day-cell shift-休';
+                    }
+                    if (col + 2 <= this.daysInMonth) {
+                        const tc = document.getElementById(`t-${row}-${col + 2}`);
+                        const wc = document.getElementById(`w-${row}-${col + 2}`);
+                        const cs = document.getElementById(`c-${row}-${col + 2}`);
+                        const cw = document.getElementById(`c-wrap-${row}-${col + 2}`);
+                        if (tc) { tc.textContent = '休'; tc.className = 'shift-cell shift-休'; }
+                        if (wc) { wc.textContent = '休'; wc.className = 'shift-cell shift-休'; }
+                        if (cs) { cs.textContent = '休'; cs.className = 'day-shift shift-休'; }
+                        if (cw) cw.className = 'day-cell shift-休';
+                    }
+                }
+                this.updateSummary(row);
+                if (!skipSave) { this.updateStats(); localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData)); }
+            },
             updateSummary(row) { const key = this.getMonthKey(); const data = this.scheduleData[key]?.[row] || {}; const counts = {}; Object.values(data).forEach(s => { if (s) counts[s] = (counts[s] || 0) + 1; }); const summary = Object.entries(counts).map(([s, c]) => `${s}${c}`).join(' '); document.getElementById(`summary-${row}`).textContent = summary || '未排班'; },
             openModal(row, col, name) { this.editingCell = { row, col }; document.getElementById('modalTitle').textContent = `${name} · ${this.currentMonth}月${col}日`; const container = document.getElementById('modalShifts'); container.innerHTML = ''; this.shiftTypes.forEach(shift => { const div = document.createElement('div'); div.className = `modal-shift shift-${shift || 'empty'}`; div.textContent = this.displayNames[shift] || '清空'; div.addEventListener('click', () => { this.setShift(row, col, shift); this.closeModal(); }); container.appendChild(div); }); document.getElementById('editModal').classList.add('active'); },
             closeModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('editModal').classList.remove('active'); this.editingCell = null; },
