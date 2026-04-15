@@ -86,6 +86,7 @@
         }
 
         input[type="month"],
+        input[type="date"],
         select {
             padding: 8px 10px;
             border: 1px solid #ddd;
@@ -249,7 +250,16 @@
             display: block;
         }
 
-        .week-toolbar {
+        .range-view {
+            display: none;
+        }
+
+        .range-view.active {
+            display: block;
+        }
+
+        .week-toolbar,
+        .range-toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -260,7 +270,8 @@
             gap: 8px;
         }
 
-        .week-toolbar span {
+        .week-toolbar span,
+        .range-toolbar span {
             font-weight: 500;
             color: #333;
             font-size: 14px;
@@ -611,7 +622,8 @@
             .stats-panel,
             .template-section,
             .view-toggle,
-            .week-toolbar {
+            .week-toolbar,
+            .range-toolbar {
                 display: none !important;
             }
 
@@ -620,7 +632,8 @@
             }
 
             .card-view,
-            .week-view {
+            .week-view,
+            .range-view {
                 display: none !important;
             }
 
@@ -643,11 +656,18 @@
             <button class="active" onclick="app.setView('table')">📊 表格</button>
             <button onclick="app.setView('card')">🃏 卡片</button>
             <button onclick="app.setView('week')">📅 周视图</button>
+            <button onclick="app.setView('range')">📆 范围</button>
         </div>
         <div class="toolbar">
             <div class="toolbar-group">
                 <label>月份</label>
                 <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
+            </div>
+            <div class="toolbar-group" id="rangePickerGroup" style="display:none;">
+                <label>开始</label>
+                <input type="date" id="rangeStart" onchange="app.onRangeChange()">
+                <label>结束</label>
+                <input type="date" id="rangeEnd" onchange="app.onRangeChange()">
             </div>
             <div class="toolbar-group">
                 <button class="btn-secondary" onclick="app.prevMonth()">←</button>
@@ -748,6 +768,17 @@
                 </table>
             </div>
         </div>
+        <div class="range-view" id="rangeView">
+            <div class="range-toolbar">
+                <span id="rangeLabel"></span>
+            </div>
+            <div class="table-wrapper" style="display:block;">
+                <table class="schedule-table" id="rangeTable">
+                    <thead id="rangeHead"></thead>
+                    <tbody id="rangeBody"></tbody>
+                </table>
+            </div>
+        </div>
         <div class="card-view" id="cardView"></div>
         <div class="stats-panel">
             <div class="stats-header-bar">
@@ -796,6 +827,11 @@
             currentWeekIndex: 0,
             init() {
                 document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
+                const now = new Date();
+                const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                document.getElementById('rangeStart').value = fmt(now);
+                const end = new Date(now); end.setDate(end.getDate() + 6);
+                document.getElementById('rangeEnd').value = fmt(end);
                 const savedOrder = localStorage.getItem('staffOrder_v2');
                 if (savedOrder) { try { this.staffOrder = JSON.parse(savedOrder); } catch (e) { } }
                 if (window.innerWidth < 768) this.setView('card');
@@ -844,12 +880,15 @@
             setView(view) {
                 this.currentView = view;
                 document.querySelectorAll('.view-toggle button').forEach((btn, i) => {
-                    btn.classList.toggle('active', (view === 'table' && i === 0) || (view === 'card' && i === 1) || (view === 'week' && i === 2));
+                    btn.classList.toggle('active', (view === 'table' && i === 0) || (view === 'card' && i === 1) || (view === 'week' && i === 2) || (view === 'range' && i === 3));
                 });
                 document.getElementById('tableView').classList.toggle('active', view === 'table');
                 document.getElementById('cardView').classList.toggle('active', view === 'card');
                 document.getElementById('weekView').classList.toggle('active', view === 'week');
+                document.getElementById('rangeView').classList.toggle('active', view === 'range');
+                document.getElementById('rangePickerGroup').style.display = view === 'range' ? 'flex' : 'none';
                 if (view === 'week') this.renderWeekView();
+                if (view === 'range') this.renderRangeView();
             },
             onMonthChange(value) { const [y, m] = value.split('-').map(Number); this.currentYear = y; this.currentMonth = m; this.loadMonthData(); },
             getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); },
@@ -909,6 +948,7 @@
                 this.renderTable();
                 this.renderCards();
                 if (this.currentView === 'week') this.renderWeekView();
+                if (this.currentView === 'range') this.renderRangeView();
                 const key = this.getMonthKey();
                 if (this.scheduleData[key]) this.applyScheduleData(this.scheduleData[key]);
                 this.updateStats();
@@ -1028,6 +1068,76 @@
                             if (cell) { cell.textContent = shift; cell.className = 'shift-cell shift-' + (shift || 'empty'); if (cell.dataset.wdWeekend) cell.classList.add('weekend-bg'); }
                         });
                     });
+                }
+            },
+            onRangeChange() {
+                if (this.currentView === 'range') this.renderRangeView();
+            },
+            renderRangeView() {
+                const startVal = document.getElementById('rangeStart').value;
+                const endVal = document.getElementById('rangeEnd').value;
+                if (!startVal || !endVal) return;
+                let start = new Date(startVal);
+                let end = new Date(endVal);
+                if (start > end) { [start, end] = [end, start]; }
+                const diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+                if (diffDays > 30) {
+                    alert('日期范围最多31天');
+                    const max = new Date(start); max.setDate(max.getDate() + 30);
+                    const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    document.getElementById('rangeEnd').value = fmt(max);
+                    end = max;
+                }
+                const dates = [];
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    dates.push(new Date(d));
+                }
+                const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
+                const thead = document.getElementById('rangeHead');
+                const tbody = document.getElementById('rangeBody');
+                let headHTML = '<tr><th class="name-header">姓名</th>';
+                dates.forEach((date) => {
+                    const wd = date.getDay();
+                    const holiday = this.isHoliday(date.getFullYear(), date.getMonth() + 1, date.getDate());
+                    const cls = [wd === 0 || wd === 6 ? 'weekend' : '', holiday ? 'holiday' : ''].filter(Boolean).join(' ');
+                    headHTML += `<th class="${cls}">${date.getMonth() + 1}/${date.getDate()}<br><small>周${weekNames[wd]}${holiday ? ' ' + holiday : ''}</small></th>`;
+                });
+                headHTML += '</tr>';
+                thead.innerHTML = headHTML;
+                tbody.innerHTML = '';
+                const staffList = this.getStaffList();
+                this.defaultStaff.forEach((_, dataRow) => {
+                    const name = staffList[dataRow];
+                    const tr = document.createElement('tr');
+                    const nameTd = document.createElement('td');
+                    nameTd.className = 'name-cell';
+                    nameTd.textContent = name;
+                    this.bindDragEvents(nameTd, dataRow);
+                    tr.appendChild(nameTd);
+                    dates.forEach((date) => {
+                        const y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate();
+                        const wd = date.getDay();
+                        const key = `${y}-${String(m).padStart(2, '0')}`;
+                        const shift = this.scheduleData[key]?.[dataRow]?.[d] || '';
+                        const td = document.createElement('td');
+                        td.className = 'shift-cell';
+                        if (wd === 0 || wd === 6) td.classList.add('weekend-bg');
+                        td.textContent = shift;
+                        td.classList.add('shift-' + (shift || 'empty'));
+                        td.addEventListener('click', () => {
+                            const origYear = this.currentYear, origMonth = this.currentMonth, origDays = this.daysInMonth;
+                            this.currentYear = y; this.currentMonth = m; this.daysInMonth = this.getDaysInMonth(y, m);
+                            this.setShift(dataRow, d, this.currentShift);
+                            this.currentYear = origYear; this.currentMonth = origMonth; this.daysInMonth = origDays;
+                            this.renderRangeView();
+                        });
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                const label = document.getElementById('rangeLabel');
+                if (label) {
+                    label.textContent = `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日 ~ ${end.getFullYear()}年${end.getMonth() + 1}月${end.getDate()}日（共${dates.length}天）`;
                 }
             },
             prevWeek() {
