@@ -1513,13 +1513,21 @@
             autoSchedule() { alert('通用版不支持自动排班，请使用下方「通用模板」功能。'); },
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
             shareSchedule() {
-                const payload = JSON.stringify(this.scheduleData);
-                const encoded = btoa(encodeURIComponent(payload));
-                this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
-                const container = document.getElementById('qrcode');
-                container.innerHTML = '';
-                new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
-                document.getElementById('shareModal').classList.add('active');
+                try {
+                    const payload = JSON.stringify(this.scheduleData);
+                    const encoded = btoa(encodeURIComponent(payload));
+                    this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+                    const container = document.getElementById('qrcode');
+                    container.innerHTML = '';
+                    try {
+                        new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
+                    } catch (qrErr) {
+                        container.innerHTML = '<div style="color:#999;font-size:12px;padding:8px;">链接较长，请直接复制下方链接分享</div>';
+                    }
+                    document.getElementById('shareModal').classList.add('active');
+                } catch (err) {
+                    alert('分享失败：' + err.message);
+                }
             },
             closeShareModal(e) {
                 if (e && e.target !== e.currentTarget) return;
