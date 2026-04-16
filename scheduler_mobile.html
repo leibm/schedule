@@ -351,15 +351,32 @@
 
         .day-cell {
             background: #ffffff;
-            aspect-ratio: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            min-height: 58px;
+            min-height: 48px;
+            padding: 4px 2px;
             transition: all 0.15s;
-            padding: 6px;
+        }
+
+        .day-cell.empty {
+            background: transparent;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .weekday-headers {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 500;
+            padding: 8px 0 4px;
+            background: #f9fafb;
+            border-bottom: 1px solid #f3f4f6;
         }
 
         .day-cell:active {
@@ -406,9 +423,10 @@
         }
 
         .day-shift {
-            font-size: 16px;
+            font-size: clamp(11px, 3.2vw, 15px);
             font-weight: 700;
-            min-height: 20px;
+            min-height: 16px;
+            line-height: 1.2;
         }
 
         .stats-panel {
@@ -1314,13 +1332,20 @@
                 const cardView = document.getElementById('cardView');
                 cardView.innerHTML = '';
                 const staffList = this.getStaffList();
+                const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+                const firstDayWeekday = new Date(this.currentYear, this.currentMonth - 1, 1).getDay();
                 this.defaultStaff.forEach((_, dataRow) => {
                     const name = staffList[dataRow];
                     const card = document.createElement('div');
                     card.className = 'staff-card';
-                    card.innerHTML = `<div class="staff-card-header"><span class="staff-name">${name}</span><span class="staff-summary" id="summary-${dataRow}">未排班</span></div><div class="days-grid" id="days-grid-${dataRow}"></div>`;
+                    card.innerHTML = `<div class="staff-card-header"><span class="staff-name">${name}</span><div style="display:flex;align-items:center;gap:8px;"><span class="staff-summary" id="summary-${dataRow}">未排班</span><button class="btn-secondary" style="padding:4px 8px;font-size:12px;" onclick="event.stopPropagation();app.exportToCalendar(${dataRow}, '${name}')" title="导出到日历">📅</button></div></div><div class="weekday-headers">${weekDays.map(d => `<span>${d}</span>`).join('')}</div><div class="days-grid" id="days-grid-${dataRow}"></div>`;
                     cardView.appendChild(card);
                     const grid = card.querySelector('.days-grid');
+                    for (let i = 0; i < firstDayWeekday; i++) {
+                        const empty = document.createElement('div');
+                        empty.className = 'day-cell empty';
+                        grid.appendChild(empty);
+                    }
                     for (let day = 1; day <= this.daysInMonth; day++) {
                         const wd = this.getWeekday(this.currentYear, this.currentMonth, day);
                         const isWeekend = wd === 0 || wd === 6;
@@ -1331,6 +1356,15 @@
                         cell.innerHTML = `<span class="day-number ${isWeekend ? 'weekend-day' : ''} ${holiday ? (holiday.off ? 'holiday-day' : 'festival-day') : ''}">${day}</span><span class="day-shift" id="c-${dataRow}-${day}"></span>`;
                         cell.addEventListener('click', () => this.openModal(dataRow, day, name));
                         grid.appendChild(cell);
+                    }
+                    const totalCells = firstDayWeekday + this.daysInMonth;
+                    const remainder = totalCells % 7;
+                    if (remainder !== 0) {
+                        for (let i = 0; i < 7 - remainder; i++) {
+                            const empty = document.createElement('div');
+                            empty.className = 'day-cell empty';
+                            grid.appendChild(empty);
+                        }
                     }
                 });
             },
@@ -1683,7 +1717,43 @@
                 }
                 input.click();
             },
-            exportExcel() { let csv = '姓名,'; for (let d = 1; d <= this.daysInMonth; d++) csv += d + '日,'; csv = csv.slice(0, -1) + '\n'; const key = this.getMonthKey(); this.defaultStaff.forEach((name, rowIndex) => { csv += name; for (let col = 1; col <= this.daysInMonth; col++) { const shift = this.scheduleData[key]?.[rowIndex]?.[col] || ''; csv += ',' + shift; } csv += '\n'; }); const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班表_${this.getMonthKey()}.csv`; a.click(); URL.revokeObjectURL(url); }
+            exportExcel() { let csv = '姓名,'; for (let d = 1; d <= this.daysInMonth; d++) csv += d + '日,'; csv = csv.slice(0, -1) + '\n'; const key = this.getMonthKey(); this.defaultStaff.forEach((name, rowIndex) => { csv += name; for (let col = 1; col <= this.daysInMonth; col++) { const shift = this.scheduleData[key]?.[rowIndex]?.[col] || ''; csv += ',' + shift; } csv += '\n'; }); const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班表_${this.getMonthKey()}.csv`; a.click(); URL.revokeObjectURL(url); },
+            exportToCalendar(row, name) {
+                const key = this.getMonthKey();
+                const data = this.scheduleData[key]?.[row] || {};
+                let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//排班系统//CN\n';
+                const monthStr = String(this.currentMonth).padStart(2, '0');
+                const yearStr = String(this.currentYear);
+                let hasEvent = false;
+                for (let d = 1; d <= this.daysInMonth; d++) {
+                    const shift = data[d] || '';
+                    if (!shift) continue;
+                    hasEvent = true;
+                    const dayStr = String(d).padStart(2, '0');
+                    const dateStr = `${yearStr}${monthStr}${dayStr}`;
+                    const holiday = this.isHoliday(this.currentYear, this.currentMonth, d);
+                    let summary = `${name} ${shift}`;
+                    if (holiday) summary += ` ${holiday.name}`;
+                    const uid = `shift-${row}-${dateStr}@${window.location.hostname || 'schedule'}`;
+                    const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                    ics += 'BEGIN:VEVENT\n';
+                    ics += `DTSTART;VALUE=DATE:${dateStr}\n`;
+                    ics += `DTEND;VALUE=DATE:${dateStr}\n`;
+                    ics += `SUMMARY:${summary}\n`;
+                    ics += `UID:${uid}\n`;
+                    ics += `DTSTAMP:${stamp}\n`;
+                    ics += 'END:VEVENT\n';
+                }
+                ics += 'END:VCALENDAR';
+                if (!hasEvent) { alert('本月暂无排班数据可导出'); return; }
+                const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `排班_${name}_${key}.ics`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
         };
         window.addEventListener('load', () => app.init());
     </script>
