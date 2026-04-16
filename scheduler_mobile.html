@@ -1107,6 +1107,12 @@
                                 } else {
                                     this.scheduleData = { ...this.scheduleData, ...shared };
                                 }
+                                if (shared.shifts && shared.displayNames) {
+                                    this.shiftTypes = shared.shifts;
+                                    this.displayNames = shared.displayNames;
+                                    const shiftDefs = shared.shifts.map(code => ({ code, name: shared.displayNames[code] || code }));
+                                    localStorage.setItem('customShifts_v1', JSON.stringify(shiftDefs));
+                                }
                                 localStorage.setItem('scheduleData_v2', JSON.stringify(this.scheduleData));
                                 window.location.hash = '';
                                 this.loadMonthData();
@@ -1792,7 +1798,7 @@
                     let payload;
                     if (isFullMonth) {
                         const monthKey = this.getMonthKey();
-                        payload = { key: monthKey, data: collectMonth(this.currentYear, this.currentMonth) || {}, shifts: this.shiftTypes };
+                        payload = { key: monthKey, data: collectMonth(this.currentYear, this.currentMonth) || {}, shifts: this.shiftTypes, displayNames: this.displayNames };
                     } else {
                         const monthSet = new Set();
                         dates.forEach(d => monthSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`));
@@ -1802,7 +1808,7 @@
                             const compact = collectMonth(y, m);
                             if (compact) data[key] = compact;
                         });
-                        payload = { range: true, data, shifts: this.shiftTypes };
+                        payload = { range: true, data, shifts: this.shiftTypes, displayNames: this.displayNames };
                     }
                     const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
                     this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
