@@ -69,12 +69,11 @@
         }
 
         .toolbar {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-            padding: 14px;
+            margin-bottom: 16px;
+            padding: 12px;
             background: #f9fafb;
             border-radius: 12px;
             border: 1px solid #f3f4f6;
@@ -85,6 +84,50 @@
             gap: 8px;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .toolbar-group label {
+            display: none;
+        }
+
+        .toolbar-group input,
+        .toolbar-group select,
+        .toolbar-group button {
+            width: 100%;
+            min-height: 44px;
+            font-size: 15px;
+            padding: 10px 8px;
+        }
+
+        .toolbar-group input[type="month"],
+        .toolbar-group input[type="date"] {
+            max-width: none;
+        }
+
+        .tg-half {
+            grid-column: span 1;
+        }
+
+        .tg-full {
+            grid-column: span 2;
+        }
+
+        .tg-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .tg-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        #rangePickerGroup {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
         }
 
         .toolbar label {
@@ -482,15 +525,15 @@
         }
 
         .template-section {
-            margin: 20px 0;
-            padding: 16px;
+            margin: 16px 0;
+            padding: 14px;
             background: #eff6ff;
             border-radius: 12px;
             border: 1px solid #dbeafe;
         }
 
         .template-section h4 {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             color: #1d4ed8;
             font-size: 15px;
             font-weight: 700;
@@ -552,22 +595,21 @@
         }
 
         .template-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 48px 1fr;
             gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
         }
 
         .template-input label {
             font-size: 13px;
-            min-width: 50px;
             color: #374151;
             font-weight: 500;
         }
 
         .template-input input,
         .template-input select {
-            flex: 1;
+            width: 100%;
             min-width: 0;
             padding: 10px 12px;
             border: 1px solid #e5e7eb;
@@ -576,6 +618,20 @@
             background: #ffffff;
             outline: none;
             transition: box-shadow 0.15s, border-color 0.15s;
+        }
+
+        .template-row:has(button) {
+            grid-template-columns: 1fr;
+        }
+
+        .template-row button {
+            width: 100%;
+            min-height: 44px;
+            font-size: 15px;
+        }
+
+        .tr-2col {
+            grid-template-columns: 48px 1fr;
         }
 
         .template-input input:focus,
@@ -686,6 +742,45 @@
                 font-size: 26px;
             }
 
+            .toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .toolbar-group {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .toolbar-group label {
+                display: inline;
+            }
+
+            .toolbar-group input,
+            .toolbar-group select,
+            .toolbar-group button {
+                width: auto;
+                min-height: auto;
+            }
+
+            .tg-half,
+            .tg-full {
+                grid-column: auto;
+            }
+
+            .tg-grid-2,
+            .tg-grid-3 {
+                display: flex;
+            }
+
+            #rangePickerGroup {
+                display: flex;
+                grid-column: auto;
+            }
+
             .shift-legend {
                 display: flex;
                 flex-wrap: wrap;
@@ -705,6 +800,20 @@
             .template-input {
                 flex-direction: row;
                 align-items: center;
+            }
+
+            .template-row {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .template-row:has(button) {
+                grid-template-columns: 1fr;
+            }
+
+            .template-row button {
+                width: auto;
+                min-height: auto;
             }
         }
 
@@ -762,31 +871,29 @@
             <button onclick="app.setView('week')">📅 周视图</button>
         </div>
         <div class="toolbar">
-            <div class="toolbar-group">
-                <label>月份</label>
+            <div class="toolbar-group tg-half">
                 <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
             </div>
-            <div class="toolbar-group" id="rangePickerGroup">
-                <label>范围</label>
+            <div class="toolbar-group tg-full" id="rangePickerGroup">
                 <input type="date" id="rangeStart" onchange="app.onRangeChange()">
                 <input type="date" id="rangeEnd" onchange="app.onRangeChange()">
                 <button class="btn-secondary" onclick="app.clearRange()">整月</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half tg-grid-3">
                 <button class="btn-secondary" onclick="app.prevMonth()">←</button>
                 <button class="btn-secondary" onclick="app.nextMonth()">→</button>
                 <button class="btn-secondary" onclick="app.currentMonth()">本月</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-full tg-grid-3">
                 <button class="btn-primary" onclick="app.saveSchedule()">💾 保存</button>
                 <button class="btn-success" onclick="app.exportExcel()">📊 Excel</button>
                 <button class="btn-secondary" onclick="window.print()">🖨️</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half tg-grid-2">
                 <button class="btn-primary" onclick="app.loadSchedule()">📥 加载</button>
                 <button class="btn-success" onclick="app.shareSchedule()">🔗 分享</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half">
                 <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
             </div>
         </div>
@@ -800,17 +907,19 @@
                         <option value="">选择人员</option>
                     </select>
                 </div>
-                <div class="template-row">
+                <div class="template-row tr-2col">
                     <label>起始</label>
-                    <input type="number" id="templateStart" min="1" max="31" value="1" style="width: 70px;">
+                    <input type="number" id="templateStart" min="1" max="31" value="1">
+                </div>
+                <div class="template-row">
                     <label>模板</label>
-                    <input type="text" id="templatePattern" value="白2,留,白3,夜,休,休" style="flex: 2;">
+                    <input type="text" id="templatePattern" value="白2,留,白3,夜,休,休">
                 </div>
                 <div class="template-row">
-                    <button class="btn-primary" onclick="app.applyTemplate()" style="width: 100%;">应用模板</button>
+                    <button class="btn-primary" onclick="app.applyTemplate()">应用模板</button>
                 </div>
                 <div class="template-row">
-                    <button class="btn-primary" onclick="app.autoSchedule()" style="width: 100%;">🤖 自动排班</button>
+                    <button class="btn-primary" onclick="app.autoSchedule()">🤖 自动排班</button>
                 </div>
             </div>
         </div>

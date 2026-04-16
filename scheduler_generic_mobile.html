@@ -69,12 +69,11 @@
         }
 
         .toolbar {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-            padding: 14px;
+            margin-bottom: 16px;
+            padding: 12px;
             background: #f9fafb;
             border-radius: 12px;
             border: 1px solid #f3f4f6;
@@ -85,6 +84,50 @@
             gap: 8px;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .toolbar-group label {
+            display: none;
+        }
+
+        .toolbar-group input,
+        .toolbar-group select,
+        .toolbar-group button {
+            width: 100%;
+            min-height: 44px;
+            font-size: 15px;
+            padding: 10px 8px;
+        }
+
+        .toolbar-group input[type="month"],
+        .toolbar-group input[type="date"] {
+            max-width: none;
+        }
+
+        .tg-half {
+            grid-column: span 1;
+        }
+
+        .tg-full {
+            grid-column: span 2;
+        }
+
+        .tg-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .tg-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        #rangePickerGroup {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
         }
 
         .toolbar label {
@@ -482,15 +525,15 @@
         }
 
         .template-section {
-            margin: 20px 0;
-            padding: 16px;
+            margin: 16px 0;
+            padding: 14px;
             background: #eff6ff;
             border-radius: 12px;
             border: 1px solid #dbeafe;
         }
 
         .template-section h4 {
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             color: #1d4ed8;
             font-size: 15px;
             font-weight: 700;
@@ -552,22 +595,21 @@
         }
 
         .template-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 48px 1fr;
             gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
         }
 
         .template-input label {
             font-size: 13px;
-            min-width: 50px;
             color: #374151;
             font-weight: 500;
         }
 
         .template-input input,
         .template-input select {
-            flex: 1;
+            width: 100%;
             min-width: 0;
             padding: 10px 12px;
             border: 1px solid #e5e7eb;
@@ -576,6 +618,87 @@
             background: #ffffff;
             outline: none;
             transition: box-shadow 0.15s, border-color 0.15s;
+        }
+
+        .template-row:has(button) {
+            grid-template-columns: 1fr;
+        }
+
+        .template-row button {
+            width: 100%;
+            min-height: 44px;
+            font-size: 15px;
+        }
+
+        .tr-2col {
+            grid-template-columns: 48px 1fr;
+        }
+
+        .template-manage-row {
+            grid-template-columns: 48px 1fr;
+            align-items: flex-start;
+        }
+
+        .template-manage-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .template-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .template-list-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 8px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+        }
+
+        .template-list-name {
+            font-weight: 600;
+            color: #1d4ed8;
+        }
+
+        .template-list-pattern {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .template-list-item button {
+            width: auto;
+            min-height: 28px;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        .template-add-line {
+            display: grid;
+            grid-template-columns: 1fr 2fr auto;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .template-add-line input {
+            min-width: 0;
+        }
+
+        .template-add-line button {
+            width: auto;
+            min-height: 40px;
+            padding: 0 14px;
+            font-size: 18px;
+            line-height: 1;
         }
 
         .template-input input:focus,
@@ -686,6 +809,33 @@
                 font-size: 26px;
             }
 
+            .toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .toolbar-group {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .toolbar-group label {
+                display: inline;
+            }
+
+            .toolbar-group button {
+                width: auto;
+                min-height: auto;
+            }
+
+            #rangePickerGroup {
+                display: flex;
+                grid-column: auto;
+            }
+
             .shift-legend {
                 display: flex;
                 flex-wrap: wrap;
@@ -705,6 +855,20 @@
             .template-input {
                 flex-direction: row;
                 align-items: center;
+            }
+
+            .template-row {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .template-row:has(button) {
+                grid-template-columns: 1fr;
+            }
+
+            .template-row button {
+                width: auto;
+                min-height: auto;
             }
         }
 
@@ -762,31 +926,29 @@
             <button onclick="app.setView('week')">📅 周视图</button>
         </div>
         <div class="toolbar">
-            <div class="toolbar-group">
-                <label>月份</label>
+            <div class="toolbar-group tg-half">
                 <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
             </div>
-            <div class="toolbar-group" id="rangePickerGroup">
-                <label>范围</label>
+            <div class="toolbar-group tg-full" id="rangePickerGroup">
                 <input type="date" id="rangeStart" onchange="app.onRangeChange()">
                 <input type="date" id="rangeEnd" onchange="app.onRangeChange()">
                 <button class="btn-secondary" onclick="app.clearRange()">整月</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half tg-grid-3">
                 <button class="btn-secondary" onclick="app.prevMonth()">←</button>
                 <button class="btn-secondary" onclick="app.nextMonth()">→</button>
                 <button class="btn-secondary" onclick="app.currentMonth()">本月</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-full tg-grid-3">
                 <button class="btn-primary" onclick="app.saveSchedule()">💾 保存</button>
                 <button class="btn-success" onclick="app.exportExcel()">📊 Excel</button>
                 <button class="btn-secondary" onclick="window.print()">🖨️</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half tg-grid-2">
                 <button class="btn-primary" onclick="app.loadSchedule()">📥 加载</button>
                 <button class="btn-success" onclick="app.shareSchedule()">🔗 分享</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half">
                 <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
             </div>
         </div>
@@ -800,26 +962,28 @@
                         <option value="">选择人员</option>
                     </select>
                 </div>
-                <div class="template-row">
+                <div class="template-row tr-2col">
                     <label>起始</label>
-                    <input type="number" id="genericTemplateStart" min="1" max="31" value="1" style="width: 60px;">
+                    <input type="number" id="genericTemplateStart" min="1" max="31" value="1">
+                </div>
+                <div class="template-row">
                     <label>模板</label>
-                    <select id="genericTemplateSelect" style="flex: 1;">
+                    <select id="genericTemplateSelect">
                         <option value="">选择模板</option>
                     </select>
                 </div>
                 <div class="template-row">
-                    <button class="btn-primary" onclick="app.applyGenericTemplate()" style="width: 100%;">应用模板</button>
+                    <button class="btn-primary" onclick="app.applyGenericTemplate()">应用模板</button>
                 </div>
-                <div class="template-row" style="margin-top: 8px; flex-direction: column; align-items: stretch;">
-                    <label>管理模板</label>
-                    <div id="genericTemplateList" style="font-size: 12px; color: #666; line-height: 1.6;"></div>
-                    <div style="display: flex; gap: 6px; margin-top: 6px;">
-                        <input type="text" id="newGenericTemplateName" placeholder="模板名称"
-                            style="flex: 1; min-width: 0;">
-                        <input type="text" id="newGenericTemplatePattern" placeholder="班次序列，如：白,夜,休,休"
-                            style="flex: 2; min-width: 0;">
-                        <button class="btn-success" onclick="app.addGenericTemplate()">+</button>
+                <div class="template-row template-manage-row">
+                    <label>管理</label>
+                    <div class="template-manage-box">
+                        <div id="genericTemplateList" class="template-list"></div>
+                        <div class="template-add-line">
+                            <input type="text" id="newGenericTemplateName" placeholder="名称">
+                            <input type="text" id="newGenericTemplatePattern" placeholder="班次序列">
+                            <button class="btn-success" onclick="app.addGenericTemplate()">+</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1616,10 +1780,8 @@
                     list.innerHTML = '';
                     this.genericTemplates.forEach((t, i) => {
                         const div = document.createElement('div');
-                        div.style.display = 'flex';
-                        div.style.justifyContent = 'space-between';
-                        div.style.alignItems = 'center';
-                        div.innerHTML = `<span>• <b>${t.name}</b>：${t.pattern}</span> <button class="btn-warning" style="padding:2px 8px; font-size:12px;" onclick="app.deleteGenericTemplate(${i})">删除</button>`;
+                        div.className = 'template-list-item';
+                        div.innerHTML = `<span class="template-list-name">${t.name}</span><span class="template-list-pattern">${t.pattern}</span><button class="btn-warning" onclick="app.deleteGenericTemplate(${i})">删除</button>`;
                         list.appendChild(div);
                     });
                 }
