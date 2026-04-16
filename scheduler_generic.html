@@ -806,6 +806,12 @@
                 padding: 10px 4px;
             }
 
+            #rangePickerGroup {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
             .template-row {
                 display: grid;
                 grid-template-columns: 48px 1fr;
@@ -925,9 +931,14 @@
             <button onclick="app.setView('week')">📅 周视图</button>
         </div>
         <div class="toolbar">
-            <div class="toolbar-group tg-full" id="rangePickerGroup">
+            <div class="toolbar-group tg-full">
                 <label>月份</label>
                 <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
+            </div>
+            <div class="toolbar-group tg-full" id="rangePickerGroup">
+                <label>范围</label>
+                <input type="date" id="rangeStart" onchange="app.onRangeChange()">
+                <input type="date" id="rangeEnd" onchange="app.onRangeChange()">
             </div>
             <div class="toolbar-group tg-full tg-grid-3">
                 <button class="btn-secondary" onclick="app.prevMonth()">←</button>

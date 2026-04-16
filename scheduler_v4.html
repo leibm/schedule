@@ -113,6 +113,12 @@
             gap: 8px;
         }
 
+        .tg-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
         input[type="month"],
         input[type="date"],
         select {
@@ -732,6 +738,12 @@
                 padding: 10px 4px;
             }
 
+            #rangePickerGroup {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
             .template-row {
                 display: grid;
                 grid-template-columns: 48px 1fr;
@@ -847,15 +859,16 @@
             <button onclick="app.setView('week')">📅 周视图</button>
         </div>
         <div class="toolbar">
-            <div class="toolbar-group tg-half">
+            <div class="toolbar-group tg-full">
+                <label>月份</label>
                 <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
             </div>
             <div class="toolbar-group tg-full" id="rangePickerGroup">
+                <label>范围</label>
                 <input type="date" id="rangeStart" onchange="app.onRangeChange()">
                 <input type="date" id="rangeEnd" onchange="app.onRangeChange()">
-                <button class="btn-secondary" onclick="app.clearRange()">整月</button>
             </div>
-            <div class="toolbar-group tg-half tg-grid-3">
+            <div class="toolbar-group tg-full tg-grid-3">
                 <button class="btn-secondary" onclick="app.prevMonth()">←</button>
                 <button class="btn-secondary" onclick="app.nextMonth()">→</button>
                 <button class="btn-secondary" onclick="app.currentMonth()">本月</button>
@@ -865,12 +878,11 @@
                 <button class="btn-success" onclick="app.exportExcel()">📊 Excel</button>
                 <button class="btn-secondary" onclick="window.print()">🖨️</button>
             </div>
-            <div class="toolbar-group tg-half tg-grid-2">
+            <div class="toolbar-group tg-full tg-grid-4">
                 <button class="btn-primary" onclick="app.loadSchedule()">📥 加载</button>
                 <button class="btn-success" onclick="app.shareSchedule()">🔗 分享</button>
-            </div>
-            <div class="toolbar-group tg-half">
-                <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
+                <button class="btn-secondary" onclick="app.clearRange()">整月</button>
+                <button class="btn-warning" onclick="app.clearAll()">🗑️ 清空</button>
             </div>
         </div>
         <div class="shift-legend" id="shiftLegend"></div>
