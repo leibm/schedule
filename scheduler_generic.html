@@ -93,6 +93,32 @@
             font-weight: 500;
         }
 
+        .tg-half {
+            grid-column: span 1;
+        }
+
+        .tg-full {
+            grid-column: span 2;
+        }
+
+        .tg-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .tg-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .tg-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
         input[type="month"],
         input[type="date"],
         select {
@@ -553,6 +579,82 @@
             flex-wrap: wrap;
         }
 
+        .template-row:has(button) {
+            display: block;
+        }
+
+        .template-row:has(button) button {
+            width: 100%;
+        }
+
+        .template-manage-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .template-manage-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .template-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .template-list-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 8px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+        }
+
+        .template-list-name {
+            font-weight: 600;
+            color: #1d4ed8;
+        }
+
+        .template-list-pattern {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .template-list-item button {
+            width: auto;
+            min-height: 28px;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        .template-add-line {
+            display: grid;
+            grid-template-columns: 1fr 2fr auto;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .template-add-line input {
+            min-width: 0;
+        }
+
+        .template-add-line button {
+            width: auto;
+            min-height: 40px;
+            padding: 0 14px;
+            font-size: 18px;
+            line-height: 1;
+        }
+
         .template-input label {
             font-size: 13px;
             min-width: 50px;
@@ -677,6 +779,55 @@
             background: #e5e7eb;
         }
 
+        @media (max-width: 767px) {
+            .toolbar {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 16px;
+                padding: 12px;
+            }
+
+            .toolbar-group {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .toolbar-group label {
+                display: none;
+            }
+
+            .toolbar-group input,
+            .toolbar-group select,
+            .toolbar-group button {
+                width: 100%;
+                min-height: 44px;
+                font-size: 15px;
+                padding: 10px 4px;
+            }
+
+            .template-row {
+                display: grid;
+                grid-template-columns: 48px 1fr;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .template-row:has(button) {
+                grid-template-columns: 1fr;
+            }
+
+            .template-row button {
+                width: 100%;
+                min-height: 44px;
+                font-size: 15px;
+            }
+
+            .tr-2col {
+                grid-template-columns: 48px 1fr;
+            }
+        }
+
         @media (min-width: 768px) {
             body {
                 padding: 24px;
@@ -710,6 +861,13 @@
             .template-input {
                 flex-direction: row;
                 align-items: center;
+            }
+
+            .toolbar {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+                padding: 14px;
             }
         }
 
@@ -767,32 +925,25 @@
             <button onclick="app.setView('week')">📅 周视图</button>
         </div>
         <div class="toolbar">
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-full" id="rangePickerGroup">
                 <label>月份</label>
                 <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
             </div>
-            <div class="toolbar-group" id="rangePickerGroup">
-                <label>范围</label>
-                <input type="date" id="rangeStart" onchange="app.onRangeChange()">
-                <input type="date" id="rangeEnd" onchange="app.onRangeChange()">
-                <button class="btn-secondary" onclick="app.clearRange()">整月</button>
-            </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-full tg-grid-3">
                 <button class="btn-secondary" onclick="app.prevMonth()">←</button>
                 <button class="btn-secondary" onclick="app.nextMonth()">→</button>
                 <button class="btn-secondary" onclick="app.currentMonth()">本月</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-full tg-grid-3">
                 <button class="btn-primary" onclick="app.saveSchedule()">💾 保存</button>
                 <button class="btn-success" onclick="app.exportExcel()">📊 Excel</button>
                 <button class="btn-secondary" onclick="window.print()">🖨️</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-full tg-grid-4">
                 <button class="btn-primary" onclick="app.loadSchedule()">📥 加载</button>
                 <button class="btn-success" onclick="app.shareSchedule()">🔗 分享</button>
-            </div>
-            <div class="toolbar-group">
-                <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
+                <button class="btn-secondary" onclick="app.clearRange()">整月</button>
+                <button class="btn-warning" onclick="app.clearAll()">🗑️ 清空</button>
             </div>
         </div>
         <div class="shift-legend" id="shiftLegend"></div>
@@ -805,7 +956,7 @@
                         <option value="">选择人员</option>
                     </select>
                 </div>
-                <div class="template-row">
+                <div class="template-row tr-2col">
                     <label>起始</label>
                     <input type="number" id="genericTemplateStart" min="1" max="31" value="1" style="width: 60px;">
                     <label>模板</label>
@@ -816,15 +967,15 @@
                 <div class="template-row">
                     <button class="btn-primary" onclick="app.applyGenericTemplate()" style="width: 100%;">应用模板</button>
                 </div>
-                <div class="template-row" style="margin-top: 8px; flex-direction: column; align-items: stretch;">
+                <div class="template-row template-manage-row">
                     <label>管理模板</label>
-                    <div id="genericTemplateList" style="font-size: 12px; color: #666; line-height: 1.6;"></div>
-                    <div style="display: flex; gap: 6px; margin-top: 6px;">
-                        <input type="text" id="newGenericTemplateName" placeholder="模板名称"
-                            style="flex: 1; min-width: 0;">
-                        <input type="text" id="newGenericTemplatePattern" placeholder="班次序列，如：白,夜,休,休"
-                            style="flex: 2; min-width: 0;">
-                        <button class="btn-success" onclick="app.addGenericTemplate()">+</button>
+                    <div class="template-manage-box">
+                        <div id="genericTemplateList" class="template-list"></div>
+                        <div class="template-add-line">
+                            <input type="text" id="newGenericTemplateName" placeholder="模板名称">
+                            <input type="text" id="newGenericTemplatePattern" placeholder="班次序列，如：白,夜,休,休">
+                            <button class="btn-success" onclick="app.addGenericTemplate()">+</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1621,10 +1772,8 @@
                     list.innerHTML = '';
                     this.genericTemplates.forEach((t, i) => {
                         const div = document.createElement('div');
-                        div.style.display = 'flex';
-                        div.style.justifyContent = 'space-between';
-                        div.style.alignItems = 'center';
-                        div.innerHTML = `< span >• <b>${t.name}</b>：${t.pattern}</span > <button class="btn-warning" style="padding:2px 8px; font-size:12px;" onclick="app.deleteGenericTemplate(${i})">删除</button>`;
+                        div.className = 'template-list-item';
+                        div.innerHTML = `<span><span class="template-list-name">${t.name}</span> <span class="template-list-pattern">${t.pattern}</span></span><button class="btn-warning" onclick="app.deleteGenericTemplate(${i})">删除</button>`;
                         list.appendChild(div);
                     });
                 }
@@ -1698,7 +1847,7 @@
                     });
                     const payload = JSON.stringify({ key: monthKey, data: compact, shifts: this.shiftTypes });
                     const encoded = btoa(encodeURIComponent(payload));
-                    this._shareUrl = `${window.location.origin}${window.location.pathname}#share = ${encoded}`;
+                    this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
                     document.getElementById('shareModal').classList.add('active');
                     const container = document.getElementById('qrcode');
                     container.innerHTML = '';
