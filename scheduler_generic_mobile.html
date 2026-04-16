@@ -1153,6 +1153,22 @@
                                         }
                                     });
                                     this.scheduleData[shared.key] = restored;
+                                } else if (shared.range && shared.data && shared.shifts) {
+                                    const shiftChars = {};
+                                    shared.shifts.forEach((t, i) => { shiftChars[String.fromCharCode(33 + i)] = t; });
+                                    Object.entries(shared.data).forEach(([monthKey, monthCompact]) => {
+                                        const [y, m] = monthKey.split('-').map(Number);
+                                        const dim = new Date(y, m, 0).getDate();
+                                        const restored = {};
+                                        Object.entries(monthCompact).forEach(([row, str]) => {
+                                            restored[row] = {};
+                                            for (let i = 0; i < str.length && i < dim; i++) {
+                                                const ch = str[i];
+                                                if (ch !== ' ') restored[row][i + 1] = shiftChars[ch] || '';
+                                            }
+                                        });
+                                        this.scheduleData[monthKey] = restored;
+                                    });
                                 } else {
                                     this.scheduleData = { ...this.scheduleData, ...shared };
                                 }
@@ -1844,21 +1860,40 @@
             saveSchedule() { const data = { version: '2.0', exportDate: new Date().toISOString(), staff: this.defaultStaff, schedules: this.scheduleData }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `排班数据_${this.getMonthKey()}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem('scheduleData_generic_v2', JSON.stringify(this.scheduleData)); alert('排班已保存！'); },
             shareSchedule() {
                 try {
-                    const monthKey = this.getMonthKey();
-                    const monthData = this.scheduleData[monthKey] || {};
+                    const dates = this.getTableDates();
+                    const isFullMonth = dates.length === this.daysInMonth && dates.every(d => d.getFullYear() === this.currentYear && d.getMonth() + 1 === this.currentMonth);
                     const shiftChars = {};
                     this.shiftTypes.forEach((t, i) => { shiftChars[t] = String.fromCharCode(33 + i); });
-                    const compact = {};
-                    this.defaultStaff.forEach((_, row) => {
-                        let str = '';
-                        for (let d = 1; d <= this.daysInMonth; d++) {
-                            const shift = monthData[row]?.[d] || '';
-                            str += shiftChars[shift] || ' ';
-                        }
-                        if (str.trim()) compact[row] = str;
-                    });
-                    const payload = JSON.stringify({ key: monthKey, data: compact, shifts: this.shiftTypes });
-                    const encoded = btoa(encodeURIComponent(payload));
+                    const collectMonth = (year, month) => {
+                        const key = `${year}-${String(month).padStart(2, '0')}`;
+                        const dim = new Date(year, month, 0).getDate();
+                        const monthData = this.scheduleData[key] || {};
+                        const compact = {};
+                        this.defaultStaff.forEach((_, row) => {
+                            let str = '';
+                            for (let d = 1; d <= dim; d++) {
+                                str += shiftChars[monthData[row]?.[d] || ''] || ' ';
+                            }
+                            if (str.trim()) compact[row] = str;
+                        });
+                        return Object.keys(compact).length ? compact : null;
+                    };
+                    let payload;
+                    if (isFullMonth) {
+                        const monthKey = this.getMonthKey();
+                        payload = { key: monthKey, data: collectMonth(this.currentYear, this.currentMonth) || {}, shifts: this.shiftTypes };
+                    } else {
+                        const monthSet = new Set();
+                        dates.forEach(d => monthSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`));
+                        const data = {};
+                        monthSet.forEach(key => {
+                            const [y, m] = key.split('-').map(Number);
+                            const compact = collectMonth(y, m);
+                            if (compact) data[key] = compact;
+                        });
+                        payload = { range: true, data, shifts: this.shiftTypes };
+                    }
+                    const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
                     this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
                     document.getElementById('shareModal').classList.add('active');
                     const container = document.getElementById('qrcode');
