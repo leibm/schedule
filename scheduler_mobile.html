@@ -1732,7 +1732,7 @@
                     const dayStr = String(d).padStart(2, '0');
                     const dateStr = `${yearStr}${monthStr}${dayStr}`;
                     const holiday = this.isHoliday(this.currentYear, this.currentMonth, d);
-                    let summary = `${name} ${shift}`;
+                    let summary = shift;
                     if (holiday) summary += ` ${holiday.name}`;
                     const uid = `shift-${row}-${dateStr}@${window.location.hostname || 'schedule'}`;
                     const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -1740,6 +1740,7 @@
                     ics += `DTSTART;VALUE=DATE:${dateStr}\n`;
                     ics += `DTEND;VALUE=DATE:${dateStr}\n`;
                     ics += `SUMMARY:${summary}\n`;
+                    if (shift === '休') ics += 'COLOR:#10b981\n';
                     ics += `UID:${uid}\n`;
                     ics += `DTSTAMP:${stamp}\n`;
                     ics += 'END:VEVENT\n';
