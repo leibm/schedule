@@ -93,6 +93,26 @@
             font-weight: 500;
         }
 
+        .tg-half {
+            grid-column: span 1;
+        }
+
+        .tg-full {
+            grid-column: span 2;
+        }
+
+        .tg-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .tg-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
         input[type="month"],
         input[type="date"],
         select {
@@ -553,6 +573,14 @@
             flex-wrap: wrap;
         }
 
+        .template-row:has(button) {
+            display: block;
+        }
+
+        .template-row:has(button) button {
+            width: 100%;
+        }
+
         .template-input label {
             font-size: 13px;
             min-width: 50px;
@@ -677,6 +705,51 @@
             background: #e5e7eb;
         }
 
+        @media (max-width: 767px) {
+            .toolbar {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 16px;
+                padding: 12px;
+            }
+
+            .toolbar-group {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .toolbar-group label {
+                display: none;
+            }
+
+            .toolbar-group input,
+            .toolbar-group select,
+            .toolbar-group button {
+                width: 100%;
+                min-height: 44px;
+                font-size: 15px;
+                padding: 10px 4px;
+            }
+
+            .template-row {
+                display: grid;
+                grid-template-columns: 48px 1fr;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .template-row:has(button) {
+                grid-template-columns: 1fr;
+            }
+
+            .template-row button {
+                width: 100%;
+                min-height: 44px;
+                font-size: 15px;
+            }
+        }
+
         @media (min-width: 768px) {
             body {
                 padding: 24px;
@@ -710,6 +783,13 @@
             .template-input {
                 flex-direction: row;
                 align-items: center;
+            }
+
+            .toolbar {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+                padding: 14px;
             }
         }
 
@@ -767,31 +847,29 @@
             <button onclick="app.setView('week')">📅 周视图</button>
         </div>
         <div class="toolbar">
-            <div class="toolbar-group">
-                <label>月份</label>
+            <div class="toolbar-group tg-half">
                 <input type="month" id="monthPicker" onchange="app.onMonthChange(this.value)">
             </div>
-            <div class="toolbar-group" id="rangePickerGroup">
-                <label>范围</label>
+            <div class="toolbar-group tg-full" id="rangePickerGroup">
                 <input type="date" id="rangeStart" onchange="app.onRangeChange()">
                 <input type="date" id="rangeEnd" onchange="app.onRangeChange()">
                 <button class="btn-secondary" onclick="app.clearRange()">整月</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half tg-grid-3">
                 <button class="btn-secondary" onclick="app.prevMonth()">←</button>
                 <button class="btn-secondary" onclick="app.nextMonth()">→</button>
                 <button class="btn-secondary" onclick="app.currentMonth()">本月</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-full tg-grid-3">
                 <button class="btn-primary" onclick="app.saveSchedule()">💾 保存</button>
                 <button class="btn-success" onclick="app.exportExcel()">📊 Excel</button>
                 <button class="btn-secondary" onclick="window.print()">🖨️</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half tg-grid-2">
                 <button class="btn-primary" onclick="app.loadSchedule()">📥 加载</button>
                 <button class="btn-success" onclick="app.shareSchedule()">🔗 分享</button>
             </div>
-            <div class="toolbar-group">
+            <div class="toolbar-group tg-half">
                 <button class="btn-warning" onclick="app.clearAll()">🗑️</button>
             </div>
         </div>
