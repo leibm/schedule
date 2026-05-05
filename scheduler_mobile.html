@@ -1806,20 +1806,40 @@
                         payload = { range: true, data, shifts: this.shiftTypes, displayNames: this.displayNames };
                     }
                     const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
-                    this._shareUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+                    const longUrl = `${window.location.origin}${window.location.pathname}#share=${encoded}`;
+                    this._shareUrl = longUrl;
                     document.getElementById('shareModal').classList.add('active');
                     const container = document.getElementById('qrcode');
-                    container.innerHTML = '';
-                    try {
-                        if (typeof QRCode !== 'undefined') {
-                            new QRCode(container, { text: this._shareUrl, width: 200, height: 200 });
-                        } else {
-                            throw new Error('QRCode not loaded');
+                    container.innerHTML = '<div style="padding:140px 40px;color:#999;font-size:13px;">生成中…</div>';
+                    const renderQR = (urlForQR) => {
+                        container.innerHTML = '';
+                        try {
+                            if (typeof QRCode !== 'undefined') {
+                                new QRCode(container, { text: urlForQR, width: 320, height: 320, correctLevel: QRCode.CorrectLevel.L });
+                            } else {
+                                throw new Error('QRCode not loaded');
+                            }
+                        } catch (qrErr) {
+                            const encodedUrl = encodeURIComponent(urlForQR);
+                            container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&ecc=L&data=' + encodedUrl + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" alt="二维码" style="width:320px;height:320px;border-radius:8px;"><div style="display:none;color:#999;font-size:12px;padding:8px;">二维码加载失败，请直接点击下方「复制链接」进行分享</div>';
                         }
-                    } catch (qrErr) {
-                        const encodedUrl = encodeURIComponent(this._shareUrl);
-                        container.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodedUrl + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';" alt="二维码" style="width:200px;height:200px;border-radius:8px;"><div style="display:none;color:#999;font-size:12px;padding:8px;">二维码加载失败，请直接点击下方「复制链接」进行分享</div>';
-                    }
+                    };
+                    let done = false;
+                    const finish = (urlForQR) => { if (done) return; done = true; renderQR(urlForQR); };
+                    const timeoutId = setTimeout(() => finish(longUrl), 4000);
+                    fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(longUrl))
+                        .then(r => r.ok ? r.text() : Promise.reject())
+                        .then(text => {
+                            clearTimeout(timeoutId);
+                            const trimmed = (text || '').trim();
+                            if (trimmed.startsWith('http')) {
+                                this._shareUrl = trimmed;
+                                finish(trimmed);
+                            } else {
+                                finish(longUrl);
+                            }
+                        })
+                        .catch(() => { clearTimeout(timeoutId); finish(longUrl); });
                 } catch (err) {
                     alert('分享失败：' + err.message);
                 }
