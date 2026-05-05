@@ -1037,15 +1037,10 @@
             currentWeekIndex: 0,
             init() {
                 this.loadSettings();
-                const lastMonth = localStorage.getItem('lastSelectedMonth_v1');
-                if (lastMonth) {
-                    document.getElementById('monthPicker').value = lastMonth;
-                    const [y, m] = lastMonth.split('-').map(Number);
-                    this.currentYear = y;
-                    this.currentMonth = m;
-                } else {
-                    document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
-                }
+                const now = new Date();
+                this.currentYear = now.getFullYear();
+                this.currentMonth = now.getMonth() + 1;
+                document.getElementById('monthPicker').value = `${this.currentYear}-${String(this.currentMonth).padStart(2, '0')}`;
                 const savedOrder = localStorage.getItem('staffOrder_v2');
                 if (savedOrder) { try { this.staffOrder = JSON.parse(savedOrder); } catch (e) { } }
                 if (window.innerWidth < 768) this.setView('card');
